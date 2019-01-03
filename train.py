@@ -1,6 +1,6 @@
 """Model training"""
 
-from engineering import main as prepareXy
+from preprocessing import main as preprocessing
 from config import PATH_XTRAIN, PATH_YTRAIN, PATH_MODELS
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
@@ -9,15 +9,15 @@ from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
 from sklearn.externals.joblib import dump
 
+
 SCORING = "accuracy"
-###############################################################################
-# LOADING AND NON-SPECIFIC FEATURE ENGINEERING
-Xtrain, ytrain = prepareXy(PATH_XTRAIN, PATH_YTRAIN)
-
-
 
 ###############################################################################
-# SHARED FUNCTIONS
+# LOADING AND APPLYING NON-SPECIFIC FEATURE ENGINEERING
+Xtrain, ytrain = preprocessing(PATH_XTRAIN, PATH_YTRAIN)
+
+###############################################################################
+# TRAINING FUNCTIONS
 
 def gridsearch(m, parameter_grid):
     grid = GridSearchCV(m, 
@@ -52,8 +52,8 @@ GRIDSEARCH: {grid}\n
 def train_logistic_regression():
     modelname = "LOGISTIC_REGRESSION_1"
     m = LogisticRegression()
-    # DEFINE SEARCHSPACE FOR GRIDSEARCH
     
+    # DEFINE SEARCHSPACE FOR GRIDSEARCH
     c_params = []
     for i in range(9, 12, 1):
         c_params.append(i / 100.0)
