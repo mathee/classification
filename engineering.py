@@ -3,14 +3,20 @@ returns X data, Y data ready for training / test """
 
 import pandas as pd
 from config import X_COLUMNS, Y_COLUMN
+from functions import one_hot_encoding
+
+###############################################################################
+
+
 
 ############################################################################### 
 # NON-MODEL-SPECIFIC FEATURE ENGINEERING
 
 def engineer_X(X_path):
-    iter_csv = pd.read_csv('data/train.csv', usecols=X_COLUMNS, iterator=True, chunksize=50000)
+    iter_csv = pd.read_csv('data/train.csv', usecols = X_COLUMNS, iterator=True, chunksize=50000) #usecols = X_COLUMNS
     X = next(iter_csv)
     X = X.dropna()
+    X = one_hot_encoding(X)
     return X
 
 def engineer_y(y_path):

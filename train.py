@@ -6,21 +6,26 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from sklearn.model_selection import GridSearchCV, cross_val_score
+from sklearn.model_selection import GridSearchCV
 from sklearn.externals.joblib import dump
 
 SCORING = "accuracy"
+###############################################################################
+# LOADING AND NON-SPECIFIC FEATURE ENGINEERING
+Xtrain, ytrain = prepareXy(PATH_XTRAIN, PATH_YTRAIN)
+
+
 
 ###############################################################################
 # SHARED FUNCTIONS
 
-def do_gridsearch(m, parameter_grid):
+def gridsearch(m, parameter_grid):
     grid = GridSearchCV(m, 
                         param_grid=parameter_grid,
                         scoring=SCORING,
                         cv=5
                         )
-    print("starting gridsearch...")
+    print("performing gridsearch...")
     grid.fit(Xtrain, ytrain)
     print("done")
     return grid
@@ -42,22 +47,42 @@ GRIDSEARCH: {grid}\n
 
 
 ###############################################################################
-# LOADING AND NON-SPECIFIC FEATURE ENGINEERING
-Xtrain, ytrain = prepareXy(PATH_XTRAIN, PATH_YTRAIN)
+# TRAIN MODELS
 
-###############################################################################
-# TRAIN LOGISTIC REGRESSION 
+def train_logistic_regression():
+    modelname = "LOGISTIC_REGRESSION_1"
+    m = LogisticRegression()
+    # DEFINE SEARCHSPACE FOR GRIDSEARCH
+    
+    c_params = []
+    for i in range(9, 12, 1):
+        c_params.append(i / 100.0)
+    penalty_types = ["l1", "l2"]
+    params = {"penalty":penalty_types,
+              "C":c_params}
+    
+    # GRIDSEARCH & SAVE TO DISC
+    grid = gridsearch(m, params)
+    save_best_model(grid, modelname)
 
-modelname = "LOGISTIC_REGRESSION_1"
-m_logreg_init = LogisticRegression()
-# DEFINE SEARCHSPACE FOR GRIDSEARCH
-c_params = []
-for i in range(5, 30, 1):
-    c_params.append(i / 100.0)
-penalty_types = ["l1", "l2"]
-params_logreg = {"penalty":penalty_types,
-          "C":c_params}
-# GRIDSEARCH & SAVE TO DISC
-grid_logreg = do_gridsearch(m_logreg_init, params_logreg)
-save_best_model(grid_logreg, modelname)
 
+def train_random_forest():
+    modelname = "RANDOM_FOREST_1_SIMPLE"
+    m = RandomForestClassifier(random_state=42)
+    
+    trees = []
+    for i in range(20, 40):
+        trees.append(i)
+    depths = []
+    for i in range(3, 6):
+        depths.append(i)
+    params = {"n_estimators":trees,
+              "max_depth" : depths}
+    
+    grid = gridsearch(m, params)
+    save_best_model(grid, modelname)
+    
+    
+#print(Xtrain.shape, ytrain.shape)    
+train_random_forest()
+#train_logistic_regression()
