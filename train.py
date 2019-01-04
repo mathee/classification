@@ -1,6 +1,6 @@
 """Model training"""
 
-from preprocessing import main as preprocessing
+from preprocessing import main_train as preprocessing
 from config import PATH_XTRAIN, PATH_YTRAIN, PATH_MODELS
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
@@ -71,10 +71,10 @@ def train_random_forest():
     m = RandomForestClassifier(random_state=42)
     
     trees = []
-    for i in range(20, 40):
+    for i in range(5, 15):
         trees.append(i)
     depths = []
-    for i in range(3, 6):
+    for i in range(7, 14):
         depths.append(i)
     params = {"n_estimators":trees,
               "max_depth" : depths}
@@ -83,6 +83,30 @@ def train_random_forest():
     save_best_model(grid, modelname)
     
     
+def train_SVC():
+    modelname = "SUPPORT_VECTOR_MACHINE"
+    m = SVC()
+    
+    #SVM
+    c_params_svm = []
+    for i in range(30, 32, 1): # e.g. 60 --> c 0.60
+        c_params_svm.append(i / 100.0)
+    kernels = ["rbf"]
+    #kernel.append("rbf")
+    gammas = []
+    for i in range(10, 12, 1): # e.g. 60 --> c 6.0
+        gammas.append(i)
+    #gamma.append("auto")
+    params = {"C":c_params_svm,
+              "kernel": kernels,
+              "gamma": gammas}
+    
+    
+    grid = gridsearch(m, params)
+    save_best_model(grid, modelname)
+    
+    
 #print(Xtrain.shape, ytrain.shape)    
-train_random_forest()
+#train_random_forest()
+#train_SVC()
 #train_logistic_regression()
