@@ -1,75 +1,17 @@
 # columns to be loaded from original csv, for training and testing
 
 ''' pathes to files that contain the raw data for xtrain, ytrain, xtest, ytest'''
+#PATH_XTRAIN = "data/titanic_train.csv"
+#PATH_YTRAIN = "data/titanic_train.csv"
 PATH_XTRAIN = "data/train.csv"
 PATH_YTRAIN = "data/train.csv"
 PATH_XTEST = "data/test.csv"
 PATH_YTEST = "data/test.csv"
 
 
-X_COLUMNS = ['ProductName',
-             'IsBeta',
-             'RtpStateBitfield',
-             'IsSxsPassiveMode',
-             'AVProductStatesIdentifier',
-             'AVProductsInstalled',
-             'AVProductsEnabled',
-             'HasTpm',
-             'CountryIdentifier',
-             'CityIdentifier',
-             'GeoNameIdentifier',
-             'LocaleEnglishNameIdentifier',
-             'Platform',
-             'Processor',
-             'OsBuild',
-             'OsSuite',
-             'OsPlatformSubRelease',
-             'SkuEdition',
-             'IsProtected',
-             'AutoSampleOptIn',
-             'SMode',
-             'IeVerIdentifier',
-             'Firewall',
-             'UacLuaenable',
-             'Census_DeviceFamily',
-             'Census_OEMNameIdentifier',
-             'Census_OEMModelIdentifier',
-             'Census_ProcessorCoreCount',
-             'Census_ProcessorManufacturerIdentifier',
-             'Census_ProcessorModelIdentifier',
-             'Census_PrimaryDiskTotalCapacity',
-             'Census_PrimaryDiskTypeName',
-             'Census_SystemVolumeTotalCapacity',
-             'Census_HasOpticalDiskDrive',
-             'Census_TotalPhysicalRAM',
-             'Census_InternalPrimaryDiagonalDisplaySizeInInches',
-             'Census_InternalPrimaryDisplayResolutionHorizontal',
-             'Census_InternalPrimaryDisplayResolutionVertical',
-             'Census_PowerPlatformRoleName',
-             'Census_InternalBatteryNumberOfCharges',
-             'Census_OSArchitecture',
-             'Census_OSBuildNumber',
-             'Census_OSBuildRevision',
-             'Census_OSInstallTypeName',
-             'Census_OSInstallLanguageIdentifier',
-             'Census_OSUILocaleIdentifier',
-             'Census_OSWUAutoUpdateOptionsName',
-             'Census_IsPortableOperatingSystem',
-             'Census_GenuineStateName',
-             'Census_ActivationChannel',
-             'Census_IsFlightsDisabled',
-             'Census_FlightRing',
-             'Census_FirmwareManufacturerIdentifier',
-             'Census_FirmwareVersionIdentifier',
-             'Census_IsSecureBootEnabled',
-             'Census_IsVirtualDevice',
-             'Census_IsTouchEnabled',
-             'Census_IsPenCapable',
-             'Census_IsAlwaysOnAlwaysConnectedCapable',
-             'Wdft_IsGamer',
-             'Wdft_RegionIdentifier',
-             ]
+X_COLUMNS = [""]
 
 Y_COLUMN = ["HasDetections"]
+#Y_COLUMN = ["Survived"]#["HasDetections"]
 
 PATH_MODELS = "models/"

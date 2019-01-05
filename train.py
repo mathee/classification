@@ -50,12 +50,12 @@ GRIDSEARCH: {grid}\n
 # TRAIN MODELS
 
 def train_logistic_regression():
-    modelname = "LOGISTIC_REGRESSION_1"
+    modelname = "LOGISTIC_REGRESSION"
     m = LogisticRegression()
     
     # DEFINE SEARCHSPACE FOR GRIDSEARCH
     c_params = []
-    for i in range(9, 12, 1):
+    for i in range(14, 20, 1):
         c_params.append(i / 100.0)
     penalty_types = ["l1", "l2"]
     params = {"penalty":penalty_types,
@@ -67,14 +67,14 @@ def train_logistic_regression():
 
 
 def train_random_forest():
-    modelname = "RANDOM_FOREST_1_SIMPLE"
+    modelname = "RANDOM_FOREST"
     m = RandomForestClassifier(random_state=42)
     
     trees = []
     for i in range(5, 15):
         trees.append(i)
     depths = []
-    for i in range(7, 14):
+    for i in range(12, 25):
         depths.append(i)
     params = {"n_estimators":trees,
               "max_depth" : depths}
@@ -84,17 +84,18 @@ def train_random_forest():
     
     
 def train_SVC():
+    # dont forget scaling!
     modelname = "SUPPORT_VECTOR_MACHINE"
     m = SVC()
     
     #SVM
     c_params_svm = []
-    for i in range(30, 32, 1): # e.g. 60 --> c 0.60
+    for i in range(8, 12, 1): # e.g. 60 --> c 0.60
         c_params_svm.append(i / 100.0)
     kernels = ["rbf"]
     #kernel.append("rbf")
     gammas = []
-    for i in range(10, 12, 1): # e.g. 60 --> c 6.0
+    for i in range(6, 12, 1): # e.g. 60 --> c 6.0
         gammas.append(i)
     #gamma.append("auto")
     params = {"C":c_params_svm,
@@ -106,7 +107,7 @@ def train_SVC():
     save_best_model(grid, modelname)
     
     
-#print(Xtrain.shape, ytrain.shape)    
-#train_random_forest()
-#train_SVC()
+#print(Xtrain.shape, ytrain.shape) 
 #train_logistic_regression()
+train_random_forest()
+#train_SVC()
