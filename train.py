@@ -71,10 +71,10 @@ def train_random_forest():
     m = RandomForestClassifier(random_state=42)
     
     trees = []
-    for i in range(5, 15):
+    for i in range(12, 16):
         trees.append(i)
     depths = []
-    for i in range(12, 25):
+    for i in range(6, 9):
         depths.append(i)
     params = {"n_estimators":trees,
               "max_depth" : depths}
