@@ -1,6 +1,6 @@
 MODEL: RANDOM_FOREST
-BEST PARAMS: {'max_depth': 6, 'n_estimators': 13}
-SCORE: 0.6061490683229813
+BEST PARAMS: {'max_depth': 8, 'n_estimators': 16}
+SCORE: 0.6096894409937889
 
 GRIDSEARCH: GridSearchCV(cv=5, error_score='raise',
        estimator=RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',
@@ -10,7 +10,7 @@ GRIDSEARCH: GridSearchCV(cv=5, error_score='raise',
             min_weight_fraction_leaf=0.0, n_estimators=10, n_jobs=1,
             oob_score=False, random_state=42, verbose=0, warm_start=False),
        fit_params=None, iid=True, n_jobs=1,
-       param_grid={'n_estimators': [12, 13, 14, 15], 'max_depth': [6, 7, 8]},
+       param_grid={'n_estimators': [15, 16, 17], 'max_depth': [6, 7, 8, 9, 10]},
        pre_dispatch='2*n_jobs', refit=True, return_train_score='warn',
        scoring='accuracy', verbose=0)
 

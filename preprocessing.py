@@ -12,11 +12,29 @@ from sklearn.feature_selection import chi2
 ###############################################################################
 # PREPROCESSING FUNCTIONS
 
+def load_chunk(path, chunksize):
+    iter_csv = pd.read_csv(path, iterator=True, chunksize=chunksize) #usecols = X_COLUMNS
+    df = next(iter_csv)
+    index_of_df = df.index.values.tolist()
+    print(f"AFTER LOADING: {type(df)} - {df.shape}\n")
+    return df, index_of_df
+
+def drop_NaNs(X):
+    X = X.dropna()
+    index_of_X = X.index.values.tolist()
+    print(f"DROPPED NaNs: {type(X)} - {X.shape}\n")
+    return X, index_of_X
+
+def drop_y_from_X(X):
+    y = X[Y_COLUMN]
+    X.drop(Y_COLUMN, axis=1, inplace=True)
+    print(f"DROPPED Y: {type(X)} - {X.shape}\n")
+    return X,y
+    
 def delete_irrelevant_object_columns(X, p=0.1):
     '''X = df: deletes columns that contain object data with too many unique values in comparison to 
     the total number of rows, thus not useful for creating dummies
     p = maximum number of unique values in relation to total number of rows, in %'''
-    print("### deleting columns with too many unique categorical values")
     object_columns = list(X.select_dtypes(include=['object']))
     irrelevant_object_columns = []
     for column in object_columns:
@@ -25,11 +43,11 @@ def delete_irrelevant_object_columns(X, p=0.1):
             irrelevant_object_columns.append(column)
         else:
             continue
-    X.drop(irrelevant_object_columns, axis=1, inplace=True)     
+    X.drop(irrelevant_object_columns, axis=1, inplace=True)   
+    print(f"DELETED IRRELEVANT OBJECT COLUMNS: {type(X)} - {X.shape}\n")
     return X
     
 def delete_columns_not_enough_values(X, p=0.75):
-    print("### deleting columns with too less values")
     all_columns = list(X)
     non_sufficient_columns = []
     for col in all_columns:
@@ -38,8 +56,10 @@ def delete_columns_not_enough_values(X, p=0.75):
         else:
             continue
     X.drop(non_sufficient_columns, axis=1, inplace=True)
+    print(f"DELETED COLUMNS WITH TOO LESS VALUES: {type(X)} - {X.shape}\n")
     return X
 
+"""
 def identify_insignificant_object_columns(X):
 
     # analyzing categorical columns: prep: grouping per categories, then 
@@ -75,18 +95,17 @@ def identify_insignificant_object_columns(X):
     scatter_df["labels"] = labels
     scatter_df["mean_std"] = mean_std
     scatter_df["count_std"] = count_std
-    scatter_df["status"] = status
-    
+    scatter_df["status"] = status    
     return cols_to_delete, scatter_df
+"""
 
 def one_hot_encoding(X):
-    print("### performing one-hot-encoding...")
     object_columns = list(X.select_dtypes(include=['object']))
     X = pd.get_dummies(X, prefix=object_columns)
+    print(f"ONE-HOT-ENCODING: {type(X)} - {X.shape}\n")
     return X
 
 def factorization_encoding(X):
-    print("### performing factorization encoding...")
     object_columns = list(X.select_dtypes(include=['object']))
     encoder = {}
     for col in object_columns:
@@ -94,6 +113,7 @@ def factorization_encoding(X):
         encoder[col] = uniques
         X[col] = labels.astype('int32')
     # SAVE ENCODER SOMEWHERE, SAME DIRECTORY WHERE PCA GOES
+    print(f"FACTORIZATION ENCODING: {type(X)} - {X.shape}\n")
     return X
 
 def factorization_encoding_using_encoder(X):
@@ -102,54 +122,69 @@ def factorization_encoding_using_encoder(X):
     # if value is not in dict, then apply -1
     return 1
 
-"""
-def scale_0_1(x_column):
+
+def scale_column_0_1(column):
     '''scales column to 0-1'''
     m = MinMaxScaler()
-    X = x_column.values.reshape(-1, 1)
+    X = column.values.reshape(-1, 1)
     m.fit(X)
+    ############### SAVE MINMAXSCALER SOMEWHERE WITH {MINMAX01_COLNAME}
     out = m.transform(X)
     return out
 
-def scale_0_1_df_except(X, columns_not_to_be_scaled):
-    '''scales all columns in df to 0-1, except the ones provided as parameter (list of strings)'''
-    print("### performing scaling 0-1...")
-    columns_to_be_scaled = list(X)
-    for i in columns_not_to_be_scaled:
-        columns_to_be_scaled.remove(i)
-    for i in columns_to_be_scaled:
-        X[[i]] = pd.to_numeric(X[i])
-        X[[i]] = scale_0_1(X[i])
+def scaling_0_1(X):
+    numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+    numeric_columns = list(X.select_dtypes(include=numerics))
+    for col in numeric_columns:
+        X[col] = scale_column_0_1(X[col])
+    print(f"AFTER SCALING 0-1: {type(X)} - {X.shape}\n")
     return X
 
-def scale_0_1_df(X):
-    print("### performing scaling 0-1...")
-    columns_to_be_scaled = list(X)
-    for i in columns_to_be_scaled:
-        X[[i]] = pd.to_numeric(X[i])
-        X[[i]] = scale_0_1(X[i])
-    return X
-"""
 
-def delete_columns_low_variance(X, threshold=0.8):
-    print("### deleting columns with low variance...")
-    sel = VarianceThreshold(threshold=(threshold * (1 - threshold)))
-    X = sel.fit_transform(X)
+def delete_columns_low_variance(X, threshold):
+    #sel = VarianceThreshold(threshold=(threshold * (1 - threshold)))
+    #X = sel.fit_transform(X)
+
+    def VarianceThreshold_selector(X, threshold):
+        #Select Model
+        selector = VarianceThreshold(threshold) #Defaults to 0.0, e.g. only remove features with the same value in all samples
+        #Fit the Model
+        selector.fit(X)
+        feature_indices = selector.get_support(indices = True) #returns an array of integers corresponding to nonremoved features
+        features = [column for column in X] #Array of all nonremoved features' names
+        filtered_features = [features[i] for i in feature_indices]
+        #Format and Return
+        selector = pd.DataFrame(selector.transform(X))
+        selector.columns = filtered_features
+        #print(filtered_features)
+        return selector
+    
+    X = VarianceThreshold_selector(X, threshold)
+    print(f"AFTER DROPPING LOW VARIANCES: {type(X)} - {X.shape}\n")
+
     return X
 
 def select_k_best_features(X, y, k):
-    print("### selecting k-best features...")
-    X = SelectKBest(chi2, k).fit_transform(X, y)
+    selector = SelectKBest(chi2, k)
+    selector.fit(X, y)
+    feature_indices = selector.get_support(indices = True)
+    features = [column for column in X] #Array of all nonremoved features' names
+    filtered_features = [features[i] for i in feature_indices]
+    X = pd.DataFrame(selector.transform(X))
+    X.columns = filtered_features
+    
+    print(f"SELECTED K-BEST FEATURES: {type(X)} - {X.shape}\n")
     return X
 
 def principal_component_analysis(X, n_components):
-    print("### performing PCA...")
     X = X-X.mean() # demean data
     pca = PCA(n_components=n_components)
     pca.fit(X)
+    #feature_indices = selector.get_support(indices = True)
     #------> EXPORT PCA SOMEWHERE FOR REUSE IN TEST
-    Xt = pca.transform(X)
-    print(f"{pca.explained_variance_ratio_.sum()} explained variance in {n_components} components")
+    Xt = pd.DataFrame(pca.transform(X))
+    print(f"PERFORMED PCA: {type(Xt)} - {Xt.shape}")
+    print(f"{pca.explained_variance_ratio_.sum()} explained variance in {n_components} components\n")
     return Xt
 
 def reduce_y_by_X(y, index_of_X):
@@ -163,52 +198,24 @@ def reduce_y_by_X(y, index_of_X):
 
 def preprocessing_Xtrain(X_path):
     ############################# LOAD DATA (CHUNKS) ##########################
-    iter_csv = pd.read_csv(X_path, iterator=True, chunksize=20000) #usecols = X_COLUMNS
-    X = next(iter_csv)
-    print(f"after loading: {X.shape}")
-
+    X, index_of_X = load_chunk(X_path, chunksize=20000)
     ############################# CONVERTING EVERYTHING TO NUMERIC VALUES #####
     X = factorization_encoding(X)
-    print(f"{X.shape}")
-
     ############################# DELETING COLUMNS THAT ARE NOT REQUIRED ######
     X = delete_columns_not_enough_values(X, p=0.75)
-    print(f"{X.shape}")
-#    X = delete_irrelevant_object_columns(X, 0.1)
-#    print(f"{X.shape}")
-
-    """
-    insignificants,_ = identify_insignificant_object_columns(X)
-    X.drop(insignificants, axis=1, inplace=True)
-    print(f"after dropping insignificant object cols: {X.shape}")  
-    """
+#    X = delete_irrelevant_object_columns(X, 0.01)
     ############################# DEALING WITH NANS ###########################
-    X = X.dropna()
-    index_of_X = X.index.values.tolist() # remaining rows
-    print(f"after dropna: {X.shape}")  
-    y = X[Y_COLUMN]
-    X.drop(Y_COLUMN, axis=1, inplace=True)
-    print(f"after dropping y: {X.shape}")  
-    
+    X, index_of_X = drop_NaNs(X)
+    X, y = drop_y_from_X(X)
+    ############################# SCALING #####################################
+    X = scaling_0_1(X)    
     ############################# CONVERTING EVERYTHING TO NUMERIC VALUES #####
 #    X = one_hot_encoding(X)
-#    print(f"{X.shape}")
-#    X = factorization_encoding(X)
-#    print(f"{X.shape}")
-    
-    ############################# SCALING #####################################
-#    X = scale_0_1_df(X)    
-
-    
+    X = factorization_encoding(X)
     ############################# NUMERIC OPERATIONS ON CLEAN DATASET #########
-    X = delete_columns_low_variance(X, threshold=0.9)
-    print(f"{X.shape}")
-#    X = select_k_best_features(X, y, 30)
-#    print(f"{X.shape}")
+#    X = delete_columns_low_variance(X, threshold=0.001)
+    X = select_k_best_features(X, y, 30)
 #    X = principal_component_analysis(X, 10)
-#    print(f"{X.shape}")
-
-    
     return X, index_of_X # for reducing y, because of dropna etc..
 
 
@@ -217,7 +224,7 @@ def preprocessing_ytrain(y_path):
     y = next(iter_csv)
     return y
 
-def main_train(X_path, y_path):
+def preprocess_training_data(X_path, y_path):
     '''prepares and returns X, y'''
     X, index_of_X = preprocessing_Xtrain(X_path)
     y = preprocessing_ytrain(y_path)

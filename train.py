@@ -1,6 +1,6 @@
 """Model training"""
 
-from preprocessing import main_train as preprocessing
+from preprocessing import preprocess_training_data as preprocessing
 from config import PATH_XTRAIN, PATH_YTRAIN, PATH_MODELS
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
@@ -71,10 +71,10 @@ def train_random_forest():
     m = RandomForestClassifier(random_state=42)
     
     trees = []
-    for i in range(12, 16):
+    for i in range(15, 18):
         trees.append(i)
     depths = []
-    for i in range(6, 9):
+    for i in range(6, 11):
         depths.append(i)
     params = {"n_estimators":trees,
               "max_depth" : depths}
