@@ -1,6 +1,6 @@
 """Model training"""
 
-from preprocessing import preprocess_training_data as preprocessing
+from preprocess_train import preprocess_training_data as preprocessing
 from config import PATH_XTRAIN, PATH_YTRAIN, PATH_MODELS
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
@@ -19,11 +19,11 @@ Xtrain, ytrain = preprocessing(PATH_XTRAIN, PATH_YTRAIN)
 ###############################################################################
 # TRAINING FUNCTIONS
 
-def gridsearch(m, parameter_grid):
+def gridsearch(m, parameter_grid, cv=5):
     grid = GridSearchCV(m, 
                         param_grid=parameter_grid,
                         scoring=SCORING,
-                        cv=5
+                        cv=cv
                         )
     print("performing gridsearch...")
     grid.fit(Xtrain, ytrain)
@@ -42,7 +42,6 @@ GRIDSEARCH: {grid}\n
     m = grid.best_estimator_
     dump(m, f'{PATH_MODELS}{modelname}.joblib')
     # load later via: clf = load('filename.joblib')  # from sklearn.externals.joblib import load
-    #m = grid.best_estimator_
     return print(info)
 
 
@@ -51,43 +50,40 @@ GRIDSEARCH: {grid}\n
 
 def train_logistic_regression():
     modelname = "LOGISTIC_REGRESSION"
-    m = LogisticRegression()
-    
+    m = LogisticRegression()    
     # DEFINE SEARCHSPACE FOR GRIDSEARCH
     c_params = []
     for i in range(14, 20, 1):
         c_params.append(i / 100.0)
     penalty_types = ["l1", "l2"]
     params = {"penalty":penalty_types,
-              "C":c_params}
-    
+              "C":c_params}    
     # GRIDSEARCH & SAVE TO DISC
-    grid = gridsearch(m, params)
+    grid = gridsearch(m, params, cv=5)
     save_best_model(grid, modelname)
+
 
 
 def train_random_forest():
     modelname = "RANDOM_FOREST"
-    m = RandomForestClassifier(random_state=42)
-    
+    m = RandomForestClassifier(random_state=42)    
     trees = []
     for i in range(15, 18):
         trees.append(i)
     depths = []
-    for i in range(6, 11):
+    for i in range(9, 12):
         depths.append(i)
     params = {"n_estimators":trees,
-              "max_depth" : depths}
-    
-    grid = gridsearch(m, params)
+              "max_depth" : depths}    
+    grid = gridsearch(m, params, cv=5)
     save_best_model(grid, modelname)
+
     
     
 def train_SVC():
     # dont forget scaling!
     modelname = "SUPPORT_VECTOR_MACHINE"
-    m = SVC()
-    
+    m = SVC()    
     #SVM
     c_params_svm = []
     for i in range(8, 12, 1): # e.g. 60 --> c 0.60
@@ -100,14 +96,14 @@ def train_SVC():
     #gamma.append("auto")
     params = {"C":c_params_svm,
               "kernel": kernels,
-              "gamma": gammas}
-    
-    
-    grid = gridsearch(m, params)
+              "gamma": gammas}    
+    grid = gridsearch(m, params, cv=5)
     save_best_model(grid, modelname)
     
-    
-#print(Xtrain.shape, ytrain.shape) 
-#train_logistic_regression()
-train_random_forest()
-#train_SVC()
+
+def main():
+    #train_logistic_regression()
+    train_random_forest()
+    #train_SVC()
+
+main()
