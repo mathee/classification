@@ -2,13 +2,14 @@
 returns X data, Y data ready for training / test """
 
 import pandas as pd
-from config import Y_COLUMN, PATH_MODELS
+from config import Y_COLUMN, PATH_MODELS, CHUNKSIZE_TRAIN, PATH_XTRAIN, PATH_YTRAIN, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn.impute import SimpleImputer
+from feature_engineering import engineer_train as feature_engineer_train
 import pickle
 import numpy as np
 
@@ -240,38 +241,48 @@ def principal_component_analysis(X, n_components):
     print(f"{pca.explained_variance_ratio_.sum()} explained variance in {n_components} components\n")
     return Xt
 
-
+############################################################################### 
+# SAVING
+    
+def save_preprocessed_Xtrain(X):
+    X.to_csv(PATH_XTRAIN_PREPROCESSED, index = False, sep = SEPARATOR)
+    print(f"SAVED X TO DISC")
+    
+def save_preprocessed_ytrain(y):
+    y.to_csv(PATH_YTRAIN_PREPROCESSED, index = False, sep = SEPARATOR)    
+    print(f"SAVED y TO DISC")
 
 ############################################################################### 
 # MAIN FUNCTIONS
 
-def preprocessing_Xtrain(X_path):
-    X, index_of_X = load_chunk(X_path, chunksize=100000)
+def preprocessing_Xtrain(path):
+    X, index_of_X = load_chunk(path, chunksize=CHUNKSIZE_TRAIN)
     X = factorization_encoding(X)
 #    X = one_hot_encoding(X)
     X = delete_sparse_columns(X, p=0.75)
 #    X = delete_irrelevant_object_columns(X, 0.01)
 #    X, index_of_X = drop_NaNs(X)
     X = impute_numerical_NaNs(X, "mean") # “median”, “most_frequent”, "mean"
+    X = feature_engineer_train(X)
     X, y = drop_y_from_X(X)
     X = scaling_0_1(X)    
 #    X = delete_columns_low_variance(X, threshold=0.001)
     X = select_k_best_features(X, y, 26)
 #    X = principal_component_analysis(X, 10)
-    return X, index_of_X # for reducing y, because of dropna etc..
+    return X, index_of_X # passing index for reducing y, because of dropna etc..
 
-def preprocessing_ytrain(y_path):
-    iter_csv = pd.read_csv(y_path, usecols=Y_COLUMN, iterator=True, chunksize=100000)
+def preprocessing_ytrain(path):
+    iter_csv = pd.read_csv(path, usecols=Y_COLUMN, iterator=True, chunksize=CHUNKSIZE_TRAIN)
     y = next(iter_csv)
     return y
 
-def preprocess_training_data(X_path, y_path):
+def main():
     '''prepares and returns X, y'''
-    X, index_of_X = preprocessing_Xtrain(X_path)
-    y = preprocessing_ytrain(y_path)
+    X, index_of_X = preprocessing_Xtrain(PATH_XTRAIN)
+    y = preprocessing_ytrain(PATH_YTRAIN)
     y = reduce_y_by_X(y, index_of_X)
-    y = y.values.reshape(-1,)
-    return X, y
+    save_preprocessed_Xtrain(X)
+    save_preprocessed_ytrain(y)
 
 
 # just for testing:    

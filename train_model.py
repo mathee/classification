@@ -1,25 +1,42 @@
 """Model training"""
 
-from preprocess_train import preprocess_training_data as preprocessing
-from config import PATH_XTRAIN, PATH_YTRAIN, PATH_MODELS
+from config import PATH_XTRAIN, PATH_YTRAIN, PATH_MODELS, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR
 from sklearn.linear_model import LogisticRegression
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
 from sklearn.externals.joblib import dump
+import pandas as pd
 
 
 SCORING = "accuracy"
 
-###############################################################################
-# LOADING AND APPLYING NON-SPECIFIC FEATURE ENGINEERING
-Xtrain, ytrain = preprocessing(PATH_XTRAIN, PATH_YTRAIN)
 
 ###############################################################################
-# TRAINING FUNCTIONS
+# LOADING DATA
 
-def gridsearch(m, parameter_grid, cv=5):
+def load_preprocessed_Xtrain():
+    X = pd.read_csv(PATH_XTRAIN_PREPROCESSED, sep = SEPARATOR)
+    print(f"LOADED X FROM DISC")
+    return X
+    
+def load_preprocessed_ytrain():
+    y = pd.read_csv(PATH_YTRAIN_PREPROCESSED,  sep = SEPARATOR)    
+    print(f"LOADED y FROM DISC")
+    return y
+
+###############################################################################
+#  MODEL SPECIFIC TWEAKING/PREPROCESSING
+
+def reshape_y(ytrain):
+    '''ytrain comes as dataframe, needs little reshape before it can be used
+    in scikit-learn models'''
+    return ytrain.values.reshape(-1,)
+
+###############################################################################
+#  GRIDSEARCH FUNCTIONS
+def gridsearch(Xtrain, ytrain, m, parameter_grid, cv=5):
     grid = GridSearchCV(m, 
                         param_grid=parameter_grid,
                         scoring=SCORING,
@@ -44,13 +61,15 @@ GRIDSEARCH: {grid}\n
     # load later via: clf = load('filename.joblib')  # from sklearn.externals.joblib import load
     return print(info)
 
-
 ###############################################################################
 # TRAIN MODELS
 
-def train_logistic_regression():
+def train_logistic_regression(Xtrain, ytrain):
     modelname = "LOGISTIC_REGRESSION"
     m = LogisticRegression()    
+    
+    ytrain = reshape_y(ytrain)
+    
     # DEFINE SEARCHSPACE FOR GRIDSEARCH
     c_params = []
     for i in range(14, 20, 1):
@@ -59,14 +78,16 @@ def train_logistic_regression():
     params = {"penalty":penalty_types,
               "C":c_params}    
     # GRIDSEARCH & SAVE TO DISC
-    grid = gridsearch(m, params, cv=5)
+    grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
     save_best_model(grid, modelname)
 
 
-
-def train_random_forest():
+def train_random_forest(Xtrain, ytrain):
     modelname = "RANDOM_FOREST"
     m = RandomForestClassifier(random_state=42)    
+    
+    ytrain = reshape_y(ytrain)
+    
     trees = []
     for i in range(15, 18):
         trees.append(i)
@@ -75,15 +96,17 @@ def train_random_forest():
         depths.append(i)
     params = {"n_estimators":trees,
               "max_depth" : depths}    
-    grid = gridsearch(m, params, cv=5)
+    grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
     save_best_model(grid, modelname)
 
     
-    
-def train_SVC():
+def train_SVC(Xtrain, ytrain):
     # dont forget scaling!
     modelname = "SUPPORT_VECTOR_MACHINE"
     m = SVC()    
+    
+    ytrain = reshape_y(ytrain)
+    
     #SVM
     c_params_svm = []
     for i in range(8, 12, 1): # e.g. 60 --> c 0.60
@@ -97,13 +120,14 @@ def train_SVC():
     params = {"C":c_params_svm,
               "kernel": kernels,
               "gamma": gammas}    
-    grid = gridsearch(m, params, cv=5)
+    grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
     save_best_model(grid, modelname)
     
 
 def main():
-    #train_logistic_regression()
-    train_random_forest()
-    #train_SVC()
+    Xtrain = load_preprocessed_Xtrain()
+    ytrain = load_preprocessed_ytrain()
+    #train_logistic_regression(Xtrain, ytrain)
+    train_random_forest(Xtrain, ytrain)
+    #train_SVC(Xtrain, ytrain)
 
-main()

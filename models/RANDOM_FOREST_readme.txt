@@ -1,6 +1,6 @@
 MODEL: RANDOM_FOREST
-BEST PARAMS: {'max_depth': 11, 'n_estimators': 16}
-SCORE: 0.62192
+BEST PARAMS: {'max_depth': 10, 'n_estimators': 16}
+SCORE: 0.6192
 
 GRIDSEARCH: GridSearchCV(cv=5, error_score='raise-deprecating',
        estimator=RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',

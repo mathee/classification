@@ -1,5 +1,6 @@
 import pandas as pd
-from config import Y_COLUMN, PATH_MODELS
+from config import Y_COLUMN, PATH_MODELS, PATH_XTEST
+from feature_engineering import engineer_test as feature_engineer_test
 import pickle
 
 ###############################################################################
@@ -51,22 +52,23 @@ def apply_scaling_0_1(X):
 ############################################################################### 
 # NON-MODEL-SPECIFIC FEATURE ENGINEERING FOR TRAINING DATA
 
-def preprocessing_Xtest(X_path):
-    X, id_column = load_chunk(X_path, chunksize=20000, id_column_label="MachineIdentifier")
+def preprocessing_Xtest(path):
+    X, id_column = load_chunk(path, chunksize=20000, id_column_label="MachineIdentifier")
     X = apply_column_structure_of_train(X)
     X = apply_factorization_encoding(X)
     X = apply_imputation(X)
     X = apply_scaling_0_1(X)
     return X, id_column
 
-def preprocessing_ytest(y_path):
-    iter_csv = pd.read_csv(y_path, usecols=Y_COLUMN, iterator=True, chunksize=20000)
+def preprocessing_ytest(path):
+    iter_csv = pd.read_csv(path, usecols=Y_COLUMN, iterator=True, chunksize=20000)
     y = next(iter_csv)
     return y
 
-def preprocess_test_data(X_path, y_path):
+def main():
     '''prepares and returns X, y'''
-    X, id_column  = preprocessing_Xtest(X_path)
+    X, id_column  = preprocessing_Xtest(PATH_XTEST)
+    X = feature_engineer_test(X)
     #y = preprocessing_ytest(y_path)
     #y = y.values.reshape(-1,)
     return X, id_column#, y

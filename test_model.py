@@ -4,11 +4,10 @@
 + optional make submission
 """
 from config import PATH_MODELS, PATH_XTEST, PATH_YTEST
-from preprocess_test import preprocess_test_data as preprocessing
 from sklearn.externals.joblib import load
 import pandas as pd
 
-
+"""
 Xtest, id_column = preprocessing(PATH_XTEST, PATH_YTEST)
 
 def predict(model):
@@ -25,3 +24,4 @@ submission["HasDetections"] = y
 
 print(submission.head(5))
 print(submission.shape)
+"""
