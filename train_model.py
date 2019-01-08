@@ -1,13 +1,9 @@
 """Model training"""
 
-from config import PATH_XTRAIN, PATH_YTRAIN, PATH_MODELS, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR
+from config import PATH_XTRAIN, PATH_YTRAIN, PATH_MODELS, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR, SCORING
 from sklearn.model_selection import GridSearchCV
 from sklearn.externals.joblib import dump
 import pandas as pd
-
-
-SCORING = "accuracy"
-
 
 ###############################################################################
 # LOADING DATA

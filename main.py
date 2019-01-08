@@ -11,7 +11,7 @@ from train_model import main as train_model
 def training_process():
 #    wrangle_trainingdata()
     preprocess_trainingdata()
-    train_model()
+#    train_model()
     
 #def test_process():
 #    wrangle_testdata()

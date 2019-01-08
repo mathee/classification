@@ -1,7 +1,7 @@
 # columns to be loaded from original csv, for training and testing
 ''' pathes to files that contain the raw data for xtrain, ytrain, xtest, ytest'''
-CHUNKSIZE_TRAIN = 20000
-CHUNKSIZE_TEST = 20000
+CHUNKSIZE_TRAIN = 200000
+CHUNKSIZE_TEST = 200000
 #PATH_XTRAIN = "data/titanic_train.csv"
 #PATH_YTRAIN = "data/titanic_train.csv"
 PATH_XTRAIN = "data/train.csv"
@@ -19,3 +19,4 @@ Y_COLUMN = ["HasDetections"]
 PATH_MODELS = "models/"
 
 SEPARATOR = "|"
+SCORING = "accuracy" # score to be maxed by gridsearch
