@@ -19,4 +19,4 @@ Y_COLUMN = ["HasDetections"]
 PATH_MODELS = "models/"
 
 SEPARATOR = "|"
-SCORING = "accuracy" # score to be maxed by gridsearch
+SCORING = "accuracy" # score to be maxed by ML model gridsearch

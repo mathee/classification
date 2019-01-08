@@ -1,7 +1,9 @@
 from keras import backend as K
 from keras.models import Sequential
 from keras.layers import Dense, Activation
-from config import PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR
+from keras.layers import BatchNormalization
+from keras.models import load_model
+from config import PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR, PATH_MODELS
 import pandas as pd
 
 
@@ -42,18 +44,21 @@ def tweak_y(ytrain):
 ###############################################################################
 # MAIN FUNCTIONS
     
+def prepare_data():
+    Xtrain = load_preprocessed_Xtrain()
+    Xtrain = tweak_X(Xtrain)
+    ytrain = load_preprocessed_ytrain()
+    ytrain = tweak_y(ytrain)
+    input_shape = get_input_shape(Xtrain)
+    return Xtrain, ytrain, input_shape
 
 def initialize_neural_net(input_shape):
     K.clear_session()
     model = Sequential()
-    model.add(Dense(26, activation = 'sigmoid', input_shape=(input_shape,)))
-    model.add(Dense(20, activation = 'sigmoid'))
-    model.add(Dense(20, activation = 'sigmoid'))
-    model.add(Dense(20, activation = 'sigmoid'))
-    model.add(Dense(20, activation = 'sigmoid'))
-    model.add(Dense(20, activation = 'sigmoid'))
-    model.add(Dense(20, activation = 'sigmoid'))
-    model.add(Dense(20, activation = 'sigmoid'))
+    model.add(Dense(26, activation = 'relu', input_shape=(input_shape,)))
+    model.add(Dense(1000, activation = 'relu', input_shape=(input_shape,)))
+    model.add(BatchNormalization()),
+    model.add(Dense(10, activation = 'relu', input_shape=(input_shape,)))
     model.add(Dense(1, activation = 'sigmoid'))
 #    loss = "categorical_crossentropy"
 #    loss = "sparse_categorical_crossentropy"   
@@ -61,16 +66,26 @@ def initialize_neural_net(input_shape):
     model.compile(optimizer='adam', loss=loss, metrics=['accuracy'])
     return model
 
-def initialize_training(model, Xtrain, ytrain):
-    model.fit(Xtrain, ytrain, epochs = 50, validation_split=0.2, batch_size=100)
-    
+def initialize_training():
+    Xtrain, ytrain, input_shape = prepare_data()
+    model = initialize_neural_net(input_shape)
+    model.fit(Xtrain, ytrain, epochs = 1, validation_split=0.2, batch_size=100)
+    model.save(f"{PATH_MODELS}NEURAL_NET.model")
+    info = f"{model.summary()}"
+    with open(f"{PATH_MODELS}NEURAL_NET_readme.txt", "w") as text_file:
+        text_file.write(info)
+    print("MODEL INITIALIZED AND SAVED")
 
-def continue_training():
-    return 1
-    # load model
-    # model fit
-    # save model
+def continue_training(epochs):
+    Xtrain, ytrain, input_shape = prepare_data()
+    model = load_model(f"{PATH_MODELS}NEURAL_NET.model")
+    model.fit(Xtrain, ytrain, epochs = epochs, validation_split=0.2, batch_size=100)
+    info = f"{model.summary()}"
+    with open(f"{PATH_MODELS}NEURAL_NET_readme.txt", "w") as text_file:
+        text_file.write(info)
+    print("CONTINUED TRAINING AND SAVED MODEL")
 
+"""
 def main():
     Xtrain = load_preprocessed_Xtrain()
     Xtrain = tweak_X(Xtrain)
@@ -78,6 +93,8 @@ def main():
     ytrain = tweak_y(ytrain)
     input_shape = get_input_shape(Xtrain)
     model = initialize_neural_net(input_shape)
-    model = initialize_training(model, Xtrain, ytrain)
-    return model
+    initialize_training(model, Xtrain, ytrain)
+    continue_training(Xtrain, ytrain, 5)
 main()
+"""
+#continue_training(2)

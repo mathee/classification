@@ -1,13 +1,12 @@
 """Model training"""
 
-from config import PATH_XTRAIN, PATH_YTRAIN, PATH_MODELS, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR, SCORING
+from config import PATH_MODELS, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR, SCORING
 from sklearn.model_selection import GridSearchCV
 from sklearn.externals.joblib import dump
 import pandas as pd
 
 ###############################################################################
 # LOADING DATA
-
 def load_preprocessed_Xtrain():
     X = pd.read_csv(PATH_XTRAIN_PREPROCESSED, sep = SEPARATOR)
     print(f"LOADED X FROM DISC")
@@ -20,7 +19,6 @@ def load_preprocessed_ytrain():
 
 ###############################################################################
 #  MODEL SPECIFIC TWEAKING/PREPROCESSING
-
 def reshape_y(ytrain):
     '''ytrain comes as dataframe, needs little reshape before it can be used
     in scikit-learn models'''
@@ -58,7 +56,6 @@ GRIDSEARCH: {grid}\n
 
 ###############################################################################
 # REGRESSION MODELS
-
 def train_linear_regression(Xtrain, ytrain):
     from sklearn.linear_model import LinearRegression
     '''for non-binary regression problems''' 
@@ -101,7 +98,6 @@ def train_elasticnet(Xtrain, ytrain):
 
 ###############################################################################
 # CLASSIFICATION MODELS
-
 def train_logistic_regression(Xtrain, ytrain):
     from sklearn.linear_model import LogisticRegression
     modelname = "LOGISTIC_REGRESSION"
@@ -116,24 +112,22 @@ def train_logistic_regression(Xtrain, ytrain):
     grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
     save_best_model(grid, modelname)
 
-
 def train_random_forest(Xtrain, ytrain):
     from sklearn.ensemble import RandomForestClassifier
     modelname = "RANDOM_FOREST"
     m = RandomForestClassifier(random_state=42)    
     ytrain = reshape_y(ytrain)
     trees = []
-    for i in range(15, 18):
+    for i in range(16, 17):
         trees.append(i)
     depths = []
-    for i in range(9, 12):
+    for i in range(11, 12):
         depths.append(i)
     params = {"n_estimators":trees,
               "max_depth" : depths}    
     grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
     save_best_model(grid, modelname)
 
-    
 def train_SVC(Xtrain, ytrain):
     from sklearn.svm import SVC
     modelname = "SUPPORT_VECTOR_MACHINE"
@@ -155,7 +149,6 @@ def train_SVC(Xtrain, ytrain):
     
 ###############################################################################
 # MAIN FUNCTION
-
 def main():
     Xtrain = load_preprocessed_Xtrain()
     ytrain = load_preprocessed_ytrain()
