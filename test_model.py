@@ -14,6 +14,7 @@ def predict(model):
     path = f"{PATH_MODELS}{model}.joblib"
     m = load(path)
     y = m.predict(Xtest)
+    #OR m.predict_proba(Xtest)[:,1] to receive probabilites, if outcome should not be binary
     return y
     
 

@@ -8,8 +8,11 @@ from sklearn.decomposition import PCA
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
+from sklearn.svm import LinearSVC
+from sklearn.linear_model import Lasso
 from sklearn.impute import SimpleImputer
 from feature_engineering import engineer_train as feature_engineer_train
+from sklearn.feature_selection import SelectFromModel
 import pickle
 import numpy as np
 
@@ -80,31 +83,50 @@ def delete_sparse_columns(X, p=0.75):
     print(f"DELETED COLUMNS WITH TOO LESS VALUES: {type(X)} - {X.shape}\n")
     return X
 
+def select_high_variance_threshold(X, threshold):
+    #Select Model
+    selector = VarianceThreshold(threshold) #Defaults to 0.0, e.g. only remove features with the same value in all samples
+    #Fit the Model
+    selector.fit(X)
+    feature_indices = selector.get_support(indices = True) #returns an array of integers corresponding to nonremoved features
+    features = [column for column in X] #Array of all nonremoved features' names
+    filtered_features = [features[i] for i in feature_indices]
+    #Format and Return
+    X = pd.DataFrame(selector.transform(X))
+    X.columns = filtered_features
 
-def delete_columns_low_variance(X, threshold):
-    #sel = VarianceThreshold(threshold=(threshold * (1 - threshold)))
-    #X = sel.fit_transform(X)
-
-    def VarianceThreshold_selector(X, threshold):
-        #Select Model
-        selector = VarianceThreshold(threshold) #Defaults to 0.0, e.g. only remove features with the same value in all samples
-        #Fit the Model
-        selector.fit(X)
-        feature_indices = selector.get_support(indices = True) #returns an array of integers corresponding to nonremoved features
-        features = [column for column in X] #Array of all nonremoved features' names
-        filtered_features = [features[i] for i in feature_indices]
-        #Format and Return
-        selector = pd.DataFrame(selector.transform(X))
-        selector.columns = filtered_features
-        #print(filtered_features)
-        return selector
-    
-    X = VarianceThreshold_selector(X, threshold)
-    
     save_column_structure(X)
-    
     print(f"AFTER DROPPING LOW VARIANCES: {type(X)} - {X.shape}\n")
+    return X
 
+def select_L1_based_classification(X, y, C):
+    ''' lasso (l1) based penalty to select features, svc for classification
+    use e.g. linear_model.Lasso for regression problems'''
+    y = y.values.reshape(-1,)
+    lsvc = LinearSVC(C=C, penalty="l1", dual=False).fit(X, y) # C, e.g. 0.007
+    model = SelectFromModel(lsvc, prefit=True)
+    feature_indices = model.get_support(indices = True)
+    features = [column for column in X] #Array of all nonremoved features' names
+    filtered_features = [features[i] for i in feature_indices]
+    X = pd.DataFrame(model.transform(X))   
+    X.columns = filtered_features
+    save_column_structure(X)
+    print(f"AFTER L1-BASED SELECTION: {type(X)} - {X.shape}\n")
+    return X
+
+def select_L1_based_regression(X, y, alpha):
+    ''' lasso (l1) based penalty to select features, svc for classification
+    use e.g. linear_model.Lasso for regression problems'''
+    y = y.values.reshape(-1,)
+    lrgr = Lasso(alpha=alpha) # alpha e.g. 0.2
+    model = SelectFromModel(lrgr, prefit=True)
+    feature_indices = model.get_support(indices = True)
+    features = [column for column in X] #Array of all nonremoved features' names
+    filtered_features = [features[i] for i in feature_indices]
+    X = pd.DataFrame(model.transform(X))   
+    X.columns = filtered_features
+    save_column_structure(X)
+    print(f"AFTER L1-BASED SELECTION: {type(X)} - {X.shape}\n")
     return X
 
 def select_k_best_features(X, y, k):
@@ -120,65 +142,6 @@ def select_k_best_features(X, y, k):
     
     print(f"SELECTED K-BEST FEATURES: {type(X)} - {X.shape}\n")
     return X
-
-"""
-
-def delete_irrelevant_object_columns(X, p=0.1):
-    '''X = df: deletes columns that contain object data with too many unique values in comparison to 
-    the total number of rows, thus not useful for creating dummies
-    p = maximum number of unique values in relation to total number of rows, in %'''
-    object_columns = list(X.select_dtypes(include=['object']))
-    irrelevant_object_columns = []
-    for column in object_columns:
-        num_unique_values = X.groupby(by=[column]).count().shape[0]
-        if num_unique_values > X.shape[0] * p:
-            irrelevant_object_columns.append(column)
-        else:
-            continue
-    X.drop(irrelevant_object_columns, axis=1, inplace=True)   
-    save_column_structure(X)
-    print(f"DELETED IRRELEVANT OBJECT COLUMNS: {type(X)} - {X.shape}\n")
-    return X
-    
-    
-def identify_insignificant_object_columns(X):
-
-    # analyzing categorical columns: prep: grouping per categories, then 
-    #1 observing standard dev over means(has detections) for grouped categories --> should be high, aka high deltas
-    #2 observing std over count of values for grouped categories --> should be low, aka evenly distributed.
-    threshold = 0.5 # size of quadrant that has to be kept
-    categorical_columns =  list(X.select_dtypes(include=['object']))
-    labels = []
-    mean_std = []
-    count_std = []
-
-    for col in categorical_columns:
-        means = X[[col, Y_COLUMN[0]]].groupby(col)
-        #stds[col] = (means.mean().std().values[0], means.count().std().values[0])
-        labels.append(col)
-        mean_std.append(means.mean().std().values[0]) #--> should be high for best significance
-        count_std.append(means.count().std().values[0])  #--> should be low for best significance
-        #single_kpi = temp
-
-    threshold_mean_std = max(mean_std) * threshold
-    threshold_count_std = max(count_std) * threshold
-
-    cols_to_delete = []
-    status = []
-    for i, col in enumerate(labels):
-        if ((mean_std[i] < threshold_mean_std) or (count_std[i] > threshold_count_std)):
-            status.append("delete")
-            cols_to_delete.append(col)
-        else:
-            status.append("keep")
-
-    scatter_df = pd.DataFrame()
-    scatter_df["labels"] = labels
-    scatter_df["mean_std"] = mean_std
-    scatter_df["count_std"] = count_std
-    scatter_df["status"] = status    
-    return cols_to_delete, scatter_df
-"""
 
 ############################################################################### 
 # ENCODING OF TEXT FEATURES
@@ -266,7 +229,8 @@ def preprocessing_Xtrain(path):
     X = feature_engineer_train(X)
     X, y = drop_y_from_X(X)
     X = scaling_0_1(X)    
-#    X = delete_columns_low_variance(X, threshold=0.001)
+#    X = select_high_variance_threshold(X, threshold=0.001)
+#    X = select_L1_based_classification(X, y, 0.009)
     X = select_k_best_features(X, y, 26)
 #    X = principal_component_analysis(X, 10)
     return X, index_of_X # passing index for reducing y, because of dropna etc..
@@ -287,4 +251,4 @@ def main():
 
 # just for testing:    
 #preprocessing_Xtrain("data/titanic_train.csv")
-#preprocessing_Xtrain("data/train.csv")
+#preprocessing_Xtrain(PATH_XTRAIN)
