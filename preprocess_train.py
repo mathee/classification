@@ -15,6 +15,7 @@ from feature_engineering import engineer_train as feature_engineer_train
 from sklearn.feature_selection import SelectFromModel
 import pickle
 import numpy as np
+from scipy import stats
 
 ###############################################################################
 # GENERAL FUNCTIONS
@@ -50,12 +51,14 @@ def reduce_y_by_X(y, index_of_X):
 # DEALING WITH NANs
     
 def drop_NaNs(X):
+    '''drops all rows from dataframe that conatin NULL values'''
     X = X.dropna()
     index_of_X = X.index.values.tolist()
     print(f"DROPPED NaNs: {type(X)} - {X.shape}\n")
     return X, index_of_X
 
 def impute_numerical_NaNs(X, strategy="mean", missing_values=np.nan):
+    '''performs imputation on all numeric columns within dataframe'''
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     numeric_columns = list(X.select_dtypes(include=numerics))
     for col in numeric_columns:
@@ -66,6 +69,26 @@ def impute_numerical_NaNs(X, strategy="mean", missing_values=np.nan):
         with open(f'{PATH_MODELS}support/imputer_{col}.model', 'wb') as handle:
             pickle.dump(imp, handle, protocol=pickle.HIGHEST_PROTOCOL)
     return X
+
+###############################################################################
+# DEALING WITH OUTLIERS
+    
+def clip_outliers(X, minPercentile = 0.01, maxPercentile = 0.99):
+    '''clips datapoints outside of the given percentiles in whole dataframe'''
+    cols = list(X)
+    for col in cols:
+        X[col] = X[col].clip((X[col].quantile(minPercentile)),(X[col].quantile(maxPercentile)))
+    print(f"CLIPPED OUTLIERS: {type(X)} - {X.shape}\n")
+    return X
+
+def delete_z_value_outliers(X, z_value = 3):
+    '''deletes rows from whole dataframe that contain outlying datapoint 
+    by the given magnitude of z'''
+    X = X[(np.abs(stats.zscore(X)) < 3).all(axis=1)]
+    index_of_X = X.index.values.tolist()
+    print(f"DELETED Z_VALUE OUTLIERS: {type(X)} - {X.shape}\n")
+    return X, index_of_X
+    
 
 ###############################################################################
 # COLUMN/FEATURE SELECTION
@@ -80,7 +103,7 @@ def delete_sparse_columns(X, p=0.75):
             continue
     X.drop(non_sufficient_columns, axis=1, inplace=True)
     save_column_structure(X)
-    print(f"DELETED COLUMNS WITH TOO LESS VALUES: {type(X)} - {X.shape}\n")
+    print(f"DELETED SPARSE COLUMNS: {type(X)} - {X.shape}\n")
     return X
 
 def select_high_variance_threshold(X, threshold):
@@ -130,6 +153,7 @@ def select_L1_based_regression(X, y, alpha):
     return X
 
 def select_k_best_features(X, y, k):
+    # works only for postivie values, so scaling needs to be done before
     selector = SelectKBest(chi2, k)
     selector.fit(X, y)
     feature_indices = selector.get_support(indices = True)
@@ -170,25 +194,35 @@ def factorization_encoding(X):
     return X
 
 ############################################################################### 
+# BALANCING DATA
+    
+def balance_data(X):
+    #df[Y_COLUMN].groupby(Y_COLUMN)[Y_COLUMN].count()
+    smallest_class = X[Y_COLUMN].groupby(Y_COLUMN)[Y_COLUMN].count()
+    # then random sample for each class with n = smallest_class
+    return X
+
+############################################################################### 
 # SCALING
 
-def scale_column_0_1(columndata, columnlabel):
+def scale_column(columndata, columnlabel, feature_range):
     '''scales column to 0-1'''
-    m = MinMaxScaler()
+    m = MinMaxScaler(feature_range=feature_range)
     X = columndata.values.reshape(-1, 1)
     m.fit(X)
-    with open(f'{PATH_MODELS}support/scaler_0_1_{columnlabel}.model', 'wb') as handle:
+    with open(f'{PATH_MODELS}support/scaler{feature_range}{columnlabel}.model', 'wb') as handle:
         pickle.dump(m, handle, protocol=pickle.HIGHEST_PROTOCOL)
     out = m.transform(X)
     return out
 
-def scaling_0_1(X):
+def scaling(X, feature_range):
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     numeric_columns = list(X.select_dtypes(include=numerics))
     for col in numeric_columns:
-        X[col] = scale_column_0_1(X[col], col)
-    print(f"AFTER SCALING 0-1: {type(X)} - {X.shape}\n")
+        X[col] = scale_column(X[col], col, feature_range)
+    print(f"AFTER SCALING {feature_range}: {type(X)} - {X.shape}\n")
     return X
+
 
 ############################################################################### 
 # DIMENSIONALITY REDUCTION
@@ -209,11 +243,11 @@ def principal_component_analysis(X, n_components):
     
 def save_preprocessed_Xtrain(X):
     X.to_csv(PATH_XTRAIN_PREPROCESSED, index = False, sep = SEPARATOR)
-    print(f"SAVED X TO DISC")
+    print(f"SAVED Xtrain TO DISC")
     
 def save_preprocessed_ytrain(y):
     y.to_csv(PATH_YTRAIN_PREPROCESSED, index = False, sep = SEPARATOR)    
-    print(f"SAVED y TO DISC")
+    print(f"SAVED ytrain TO DISC")
 
 ############################################################################### 
 # MAIN FUNCTIONS
@@ -223,16 +257,19 @@ def preprocessing_Xtrain(path):
     X = factorization_encoding(X)
 #    X = one_hot_encoding(X)
     X = delete_sparse_columns(X, p=0.75)
-#    X = delete_irrelevant_object_columns(X, 0.01)
 #    X, index_of_X = drop_NaNs(X)
     X = impute_numerical_NaNs(X, "mean") # “median”, “most_frequent”, "mean"
     X = feature_engineer_train(X)
     X, y = drop_y_from_X(X)
-    X = scaling_0_1(X)    
-#    X = select_high_variance_threshold(X, threshold=0.001)
+    X = scaling(X, (0,1))  
+    X = select_high_variance_threshold(X, threshold=0.001)
 #    X = select_L1_based_classification(X, y, 0.009)
-    X = select_k_best_features(X, y, 26)
+    X = clip_outliers(X, 0.02, 0.98)
+    #X, index_of_X = delete_z_value_outliers(X, z_value = 3)
+    #y = reduce_y_by_X(y, index_of_X)
+    X = select_k_best_features(X, y, 8) #26 works best for random forest, 60 for nn
 #    X = principal_component_analysis(X, 10)
+    X = scaling(X, (-1,1))
     return X, index_of_X # passing index for reducing y, because of dropna etc..
 
 def preprocessing_ytrain(path):
@@ -247,8 +284,3 @@ def main():
     y = reduce_y_by_X(y, index_of_X)
     save_preprocessed_Xtrain(X)
     save_preprocessed_ytrain(y)
-
-
-# just for testing:    
-#preprocessing_Xtrain("data/titanic_train.csv")
-#preprocessing_Xtrain(PATH_XTRAIN)

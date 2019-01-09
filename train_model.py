@@ -9,12 +9,12 @@ import pandas as pd
 # LOADING DATA
 def load_preprocessed_Xtrain():
     X = pd.read_csv(PATH_XTRAIN_PREPROCESSED, sep = SEPARATOR)
-    print(f"LOADED X FROM DISC")
+    print(f"LOADED Xtrain FROM DISC")
     return X
     
 def load_preprocessed_ytrain():
     y = pd.read_csv(PATH_YTRAIN_PREPROCESSED,  sep = SEPARATOR)    
-    print(f"LOADED y FROM DISC")
+    print(f"LOADED ytrain FROM DISC")
     return y
 
 ###############################################################################
@@ -50,8 +50,8 @@ GRIDSEARCH: {grid}\n
     with open(f"{PATH_MODELS}{modelname}_readme.txt", "w") as text_file:
         text_file.write(info)
     m = grid.best_estimator_
-    dump(m, f'{PATH_MODELS}{modelname}.joblib')
-    # load later via: clf = load('filename.joblib')  # from sklearn.externals.joblib import load
+    dump(m, f'{PATH_MODELS}{modelname}.model')
+    # load later via: clf = load('filename.model')  # from sklearn.externals.joblib import load
     return print(info)
 
 ###############################################################################
