@@ -2,7 +2,7 @@
 returns X data, Y data ready for training / test """
 
 import pandas as pd
-from config import Y_COLUMN, PATH_MODELS, CHUNKSIZE_TRAIN, PATH_XTRAIN, PATH_YTRAIN, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR
+from config import Y_COLUMN, PATH_MODELS, CHUNKSIZE_TRAIN, PATH_XTRAIN, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import VarianceThreshold
@@ -23,16 +23,16 @@ from scipy import stats
 def load_chunk(path, chunksize):
     iter_csv = pd.read_csv(path, iterator=True, chunksize=chunksize) #usecols = X_COLUMNS
     df = next(iter_csv)
-    index_of_df = df.index.values.tolist()
+    #index_of_df = df.index.values.tolist()
     print(f"AFTER LOADING: {type(df)} - {df.shape}\n")
-    return df, index_of_df
+    return df
 
 def drop_y_from_X(X):
     '''deletes y-column in case it is still present in X data'''
     y = X[Y_COLUMN]
     X.drop(Y_COLUMN, axis=1, inplace=True)
     print(f"DROPPED Y: {type(X)} - {X.shape}\n")
-    return X,y
+    return X, y
 
 def save_column_structure(X):
     '''saves dataframe with one row to disc, is used than later as a "blueprint"
@@ -53,9 +53,10 @@ def reduce_y_by_X(y, index_of_X):
 def drop_NaNs(X):
     '''drops all rows from dataframe that conatin NULL values'''
     X = X.dropna()
-    index_of_X = X.index.values.tolist()
+#    y = X[Y_COLUMN]
+#    index_of_X = X.index.values.tolist()
     print(f"DROPPED NaNs: {type(X)} - {X.shape}\n")
-    return X, index_of_X
+    return X
 
 def impute_numerical_NaNs(X, strategy="mean", missing_values=np.nan):
     '''performs imputation on all numeric columns within dataframe'''
@@ -171,6 +172,7 @@ def select_k_best_features(X, y, k):
 # ENCODING OF TEXT FEATURES
 
 def one_hot_encoding(X):
+    '''creates new column for each category within categorical column'''
     object_columns = list(X.select_dtypes(include=['object']))
     X = pd.get_dummies(X, prefix=object_columns)
     save_column_structure(X)
@@ -178,6 +180,7 @@ def one_hot_encoding(X):
     return X
 
 def factorization_encoding(X):
+    '''encodes categorical columns. side effect: NaNs are being replaced by -1'''
     object_columns = list(X.select_dtypes(include=['object']))
 
     for col in object_columns:
@@ -196,17 +199,20 @@ def factorization_encoding(X):
 ############################################################################### 
 # BALANCING DATA
     
-def balance_data(X):
+def balance_dataset(X):
     #df[Y_COLUMN].groupby(Y_COLUMN)[Y_COLUMN].count()
-    smallest_class = X[Y_COLUMN].groupby(Y_COLUMN)[Y_COLUMN].count()
-    # then random sample for each class with n = smallest_class
+    #smallest_class = X[Y_COLUMN].groupby(Y_COLUMN)[Y_COLUMN].count()
+    g = X.groupby("Survived")
+    X = pd.DataFrame(g.apply(lambda x: x.sample(g.size().min()).reset_index(drop=True)))
+#    index_of_X = X.index.values.tolist()
+    print(f"BALANCED DATASET: {type(X)} - {X.shape}\n")
     return X
 
 ############################################################################### 
 # SCALING
-
+    
 def scale_column(columndata, columnlabel, feature_range):
-    '''scales column to 0-1'''
+    '''scales column accoring to given feature_range, e.g. (0,1)'''
     m = MinMaxScaler(feature_range=feature_range)
     X = columndata.values.reshape(-1, 1)
     m.fit(X)
@@ -253,34 +259,24 @@ def save_preprocessed_ytrain(y):
 # MAIN FUNCTIONS
 
 def preprocessing_Xtrain(path):
-    X, index_of_X = load_chunk(path, chunksize=CHUNKSIZE_TRAIN)
+    X = load_chunk(path, chunksize=CHUNKSIZE_TRAIN)
     X = factorization_encoding(X)
-#    X = one_hot_encoding(X)
     X = delete_sparse_columns(X, p=0.75)
-#    X, index_of_X = drop_NaNs(X)
     X = impute_numerical_NaNs(X, "mean") # “median”, “most_frequent”, "mean"
     X = feature_engineer_train(X)
-    X, y = drop_y_from_X(X)
+    X, y = drop_y_from_X(X) #--> decouple y from X at this point, after row deletions
     X = scaling(X, (0,1))  
     X = select_high_variance_threshold(X, threshold=0.001)
-#    X = select_L1_based_classification(X, y, 0.009)
     X = clip_outliers(X, 0.02, 0.98)
-    #X, index_of_X = delete_z_value_outliers(X, z_value = 3)
-    #y = reduce_y_by_X(y, index_of_X)
-    X = select_k_best_features(X, y, 8) #26 works best for random forest, 60 for nn
-#    X = principal_component_analysis(X, 10)
+    X = select_k_best_features(X, y, 7) #26 works best for random forest, 60 for nn
     X = scaling(X, (-1,1))
-    return X, index_of_X # passing index for reducing y, because of dropna etc..
+    return X, y 
 
-def preprocessing_ytrain(path):
-    iter_csv = pd.read_csv(path, usecols=Y_COLUMN, iterator=True, chunksize=CHUNKSIZE_TRAIN)
-    y = next(iter_csv)
-    return y
 
 def main():
     '''prepares and returns X, y'''
-    X, index_of_X = preprocessing_Xtrain(PATH_XTRAIN)
-    y = preprocessing_ytrain(PATH_YTRAIN)
-    y = reduce_y_by_X(y, index_of_X)
+    X, y = preprocessing_Xtrain(PATH_XTRAIN)
+#    y = preprocessing_ytrain(PATH_YTRAIN)
+#    y = reduce_y_by_X(y, index_of_X)
     save_preprocessed_Xtrain(X)
     save_preprocessed_ytrain(y)

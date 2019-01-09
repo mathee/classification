@@ -56,11 +56,10 @@ def initialize_neural_net(input_shape):
     
     model = Sequential()
     
-    model.add(Dense(40, activation = 'relu', input_shape=(input_shape,)))
-#    model.add(Dropout(0.5))
-    model.add(Dense(100, activation = 'relu' ))
-#    model.add(Dropout(0.5))
-#    model.add(Dense(1000, activation = 'relu' ))
+    model.add(Dense(7, activation = 'relu', input_shape=(input_shape,)))
+    model.add(Dense(20, activation = 'relu' ))
+    model.add(Dropout(0.5))
+    model.add(Dense(20, activation = 'relu' ))
     model.add(Dense(1, activation = 'sigmoid'))
     
 #    loss = "categorical_crossentropy"

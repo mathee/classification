@@ -1,5 +1,5 @@
 import pandas as pd
-from config import Y_COLUMN, PATH_MODELS, PATH_XTEST, PATH_YTEST, ID_COLUMN_LABEL, CHUNKSIZE_TEST, PATH_XTEST_PREPROCESSED, PATH_YTEST_PREPROCESSED, SEPARATOR, PATH_SUBMISSION_FILE
+from config import Y_COLUMN, PATH_MODELS, PATH_XTEST, PATH_YTEST, ID_COLUMN_LABEL, CHUNKSIZE_TEST, PATH_XTEST_PREPROCESSED, PATH_YTEST_PREPROCESSED, SEPARATOR, PATH_SUBMISSION_FILE_PREP
 from feature_engineering import engineer_test as feature_engineer_test
 import pickle
 
@@ -69,7 +69,7 @@ def save_preprocessed_ytest(y):
 def save_submission_frame(id_column):
     '''optional, prepare file for competition submission, e.g. kaggle'''
     submission = pd.DataFrame(id_column, columns=[ID_COLUMN_LABEL])
-    submission.to_csv(PATH_SUBMISSION_FILE, index = False, sep = SEPARATOR)    
+    submission.to_csv(PATH_SUBMISSION_FILE_PREP, index = False, sep = SEPARATOR)    
     print(f"PREPARED SUBMISSION FILE")
     
     

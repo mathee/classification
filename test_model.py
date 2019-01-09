@@ -3,7 +3,7 @@
 + optional scoring on test
 + optional make submission
 """
-from config import PATH_MODELS, PATH_XTEST, PATH_YTEST, Y_COLUMN, PATH_XTEST_PREPROCESSED, PATH_YTEST_PREPROCESSED, SEPARATOR, PATH_SUBMISSION_FILE
+from config import PATH_MODELS, PATH_XTEST, PATH_YTEST, Y_COLUMN, PATH_XTEST_PREPROCESSED, PATH_YTEST_PREPROCESSED, SEPARATOR, PATH_SUBMISSION_FILE, PATH_SUBMISSION_FILE_PREP
 from sklearn.externals.joblib import load
 import pandas as pd
 from keras.models import load_model
@@ -21,7 +21,7 @@ def load_preprocessed_ytest():
     return y
 
 def load_submission_file():
-    submission = pd.read_csv(PATH_SUBMISSION_FILE,  sep = SEPARATOR)    
+    submission = pd.read_csv(PATH_SUBMISSION_FILE_PREP,  sep = SEPARATOR)    
     print(f"LOADED EMPTY SUBMISSION FILE FROM DISC\n")
     return submission
 
