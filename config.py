@@ -1,8 +1,10 @@
 # columns to be loaded from original csv, for training and testing
 ''' pathes to files that contain the raw data for xtrain, ytrain, xtest, ytest'''
-CHUNKSIZE_TRAIN = 50000
-CHUNKSIZE_TEST = 50000
-
+CHUNKSIZE_TRAIN = 5000000
+CHUNKSIZE_TEST = 5000000
+###############################################################################
+# CHOOSE FILE PATHES
+"""
 PATH_XTRAIN = "data/titanic_train.csv"
 PATH_YTRAIN = "data/titanic_train.csv"
 PATH_XTEST = "data/titanic_test.csv"
@@ -10,13 +12,28 @@ PATH_YTEST = "data/titanic_test.csv"
 ID_COLUMN_LABEL = "PassengerId"
 Y_COLUMN = ["Survived"]
 """
-PATH_XTRAIN = "data/train.csv"
-PATH_YTRAIN = "data/train.csv"
-PATH_XTEST = "data/test.csv"
-PATH_YTEST = "data/test.csv"
-#ID_COLUMN_LABEL = "MachineIdentifier"
-#Y_COLUMN = ["HasDetections"]
+PATH_XTRAIN = "data/microsoft_train.csv"
+PATH_YTRAIN = "data/microsoft_train.csv"
+PATH_XTEST = "data/microsoft_test.csv"
+PATH_YTEST = "data/microsoft_test.csv"
+ID_COLUMN_LABEL = "MachineIdentifier"
+Y_COLUMN = ["HasDetections"]
 """
+PATH_XTRAIN = "data/housing_train.csv"
+PATH_YTRAIN = "data/housing_train.csv"
+PATH_XTEST = "data/housing_test.csv"
+PATH_YTEST = "data/housing_test.csv"
+ID_COLUMN_LABEL = "Id"
+Y_COLUMN = ["SalePrice"]
+
+PATH_XTRAIN = "data/pubg_train.csv"
+PATH_YTRAIN = "data/pubg_train.csv"
+PATH_XTEST = "data/pubg_test.csv"
+PATH_YTEST = "data/pubg_test.csv"
+ID_COLUMN_LABEL = "Id"
+Y_COLUMN = ["winPlacePerc"]
+"""
+
 
 PATH_XTRAIN_PREPROCESSED = "data/preprocessed/Xtrain_preprocessed.csv"
 PATH_YTRAIN_PREPROCESSED = "data/preprocessed/ytrain_preprocessed.csv"
@@ -27,4 +44,3 @@ PATH_SUBMISSION_FILE = "results/submission"#_{modelname}.csv
 PATH_MODELS = "models/"
 
 SEPARATOR = "|"
-SCORING = "accuracy" # score to be maxed by ML model gridsearch

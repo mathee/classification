@@ -5,9 +5,9 @@ from wrangle import wrangle_trainingdata as wrangle_trainingdata
 from wrangle import wrangle_testdata as wrangle_testdata
 from preprocess_train import main as preprocess_trainingdata
 from preprocess_test import main as preprocess_testingdata
-from train_model import main as train_model
-from train_neural_net import initialize_training, continue_training
-from test_model import test_ML_model, test_neural_net
+from train_ML import main as train_model
+from train_NN import initialize_training, continue_training
+from predict import ML_predict, NN_predict
 
 
 ###############################################################################
@@ -21,24 +21,24 @@ def preprocess_traindata():
     
 ###############################################################################
 # TRAIN ML MODEL
-def train_ML_model():
-    train_model()
+def train_ML_model(modelname):
+    train_model(modelname)
 
 ###############################################################################
 # TRAIN NEURAL NETWORK 
-def initialize_nn():
-    initialize_training()
+def initialize_nn(modelname):
+    initialize_training(modelname)
     
-def continue_training_nn(epochs):
-    continue_training(epochs)
+def continue_training_nn(modelname, epochs):
+    continue_training(modelname, epochs)
 
 ###############################################################################
 # APPLY MODEL ON UNSEEN DATA (PREDICT ON TEST) 
 def preprocess_testdata():
     preprocess_testingdata()    
 
-def apply_ML_model(modelname):
-    test_ML_model(modelname)
+def apply_ML(modelname):
+    ML_predict(modelname)
     
-def apply_nn():
-    test_neural_net()
+def apply_NN(modelname):
+    NN_predict(modelname)

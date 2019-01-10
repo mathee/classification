@@ -54,6 +54,12 @@ def apply_scaling(X, feature_range):
     print(f"APPLIED SCALING {feature_range}: {type(X)} - {X.shape}\n")
     return X
 
+def apply_PCA(X):
+    with open(f'{PATH_MODELS}support/PCA.model', 'rb') as handle:
+        pca = pickle.load(handle)
+    X = pd.DataFrame(pca.transform(X))
+    print(f"APPLIED PCA: {type(X)} - {X.shape}\n")
+    return X
 
 ############################################################################### 
 # SAVING
@@ -78,7 +84,6 @@ def save_submission_frame(id_column):
 
 def preprocessing_Xtest(path=PATH_XTEST):
     X, id_column = load_chunk(path)
-#    X = apply_one_hot_encoding(X)
     X = apply_column_structure_of_train(X)
     X = apply_factorization_encoding(X)
     X = apply_imputation(X)

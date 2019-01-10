@@ -1,6 +1,6 @@
 """Model training"""
 
-from config import PATH_MODELS, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR, SCORING
+from config import PATH_MODELS, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LinearRegression
@@ -38,10 +38,10 @@ def convert_y_to_float(ytrain):
 
 ###############################################################################
 #  GRIDSEARCH FUNCTIONS
-def gridsearch(Xtrain, ytrain, m, parameter_grid, cv=5):
+def gridsearch(Xtrain, ytrain, m, parameter_grid, scoring, cv):
     grid = GridSearchCV(m, 
                         param_grid=parameter_grid,
-                        scoring=SCORING,
+                        scoring=scoring,
                         cv=cv
                         )
     print("performing gridsearch...")
@@ -70,29 +70,47 @@ def get_parameters(modelname):
     else: 
         return {}
 
-def train_grid(Xtrain, ytrain, modelname, model, parameters):
+def train_grid(Xtrain, ytrain, modelname, model, parameters, scoring, cv):
     '''logistic regression, random forest, support vector machines,
     linear regression, ridge regression, lasso regression, elasticnet'''
     ytrain = reshape_y(ytrain)
-    grid = gridsearch(Xtrain, ytrain, model, parameters, cv=5)
+    grid = gridsearch(Xtrain, ytrain, model, parameters, scoring, cv)
     save_best_model(grid, modelname)
     evaluate_gridsearch(Xtrain, ytrain, grid, modelname)
     
 ###############################################################################
 # MAIN FUNCTION
-def main():
+def main(modelname):
     Xtrain = load_preprocessed_Xtrain()
     ytrain = load_preprocessed_ytrain()
     
-    train_grid(Xtrain, ytrain, 
-               "RANDOM_FOREST", 
-               RandomForestClassifier(random_state=42), 
-               get_parameters("RANDOM_FOREST"))
-    
-    train_grid(Xtrain, ytrain, 
-               "LOGISTIC_REGRESSION", 
-               LogisticRegression(), 
-               get_parameters("LOGISTIC_REGRESSION"))
-    
-
-
+    if modelname == "RANDOM_FOREST":
+        train_grid(Xtrain, ytrain, 
+                   "RANDOM_FOREST", 
+                   RandomForestClassifier(random_state=42), 
+                   get_parameters("RANDOM_FOREST"),
+                   scoring = "accuracy",
+                   cv = 5)
+    elif modelname == "LOGISTIC_REGRESSION":
+        train_grid(Xtrain, ytrain, 
+                   "LOGISTIC_REGRESSION", 
+                   LogisticRegression(), 
+                   get_parameters("LOGISTIC_REGRESSION"),
+                   scoring = "accuracy",
+                   cv = 5)        
+    elif modelname == "LINEAR_REGRESSION":
+        train_grid(Xtrain, ytrain, 
+                   "LINEAR_REGRESSION", 
+                   LinearRegression(), 
+                   get_parameters("LINEAR_REGRESSION"),
+                   scoring = "neg_mean_absolute_error",
+                   cv = 5)     
+    elif modelname == "ELASTICNET":
+        train_grid(Xtrain, ytrain, 
+                   "ELASTICNET", 
+                   ElasticNet(), 
+                   get_parameters("ELASTICNET"),
+                   scoring = "explained_variance",
+                   cv = 5)        
+    else:
+        print("MODEL NOT PREPARED!")

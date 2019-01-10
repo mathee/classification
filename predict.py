@@ -1,8 +1,6 @@
-"""
-+ m.predict,
-+ optional scoring on test
-+ optional make submission
-"""
+"""this script contains predictions functions, i.e. applying trained models on
+a set of preprocessed testdata"""
+
 from config import PATH_MODELS, PATH_XTEST, PATH_YTEST, Y_COLUMN, PATH_XTEST_PREPROCESSED, PATH_YTEST_PREPROCESSED, SEPARATOR, PATH_SUBMISSION_FILE, PATH_SUBMISSION_FILE_PREP
 from sklearn.externals.joblib import load
 import pandas as pd
@@ -37,21 +35,21 @@ def save_submission_file(ypred, modelname):
 ###############################################################################
 # PREDICT
 
-def predict_ML(Xtest, modelname):
+def make_predictions_ML(Xtest, modelname):
     path = f"{PATH_MODELS}{modelname}.model"
     m = load(path)
     y = m.predict(Xtest)
-    y = y.round(0).astype(int) # for binary problems, turns probabilites into 1 or 0
+    y = y.astype(float) # for binary problems, turns probabilites into 1 or 0
     print(f"MADE PREDICTIONS WITH {modelname}\n")
     #OR m.predict_proba(Xtest)[:,1] to receive probabilites, if outcome should not be binary
     return y
     
-def predict_NN(Xtest, nn_name):
+def make_predictions_NN(Xtest, nn_name):
     K.clear_session()
     path = f"{PATH_MODELS}{nn_name}.model"
     m = load_model(path)
     y = m.predict(Xtest)
-    y = y.round(0).astype(int) # for binary problems, turns probabilites into 1 or 0
+    y = y.astype(int) # for binary problems, turns probabilites into 1 or 0
 #    y = y.argmax(axis=-1) #make probabilities distinct classes
     print(f"MADE PREDICTIONS\n")
     return y
@@ -59,15 +57,15 @@ def predict_NN(Xtest, nn_name):
 ###############################################################################
 # MAIN
 
-def test_ML_model(modelname):
+def ML_predict(modelname):
     Xtest = load_preprocessed_Xtest()
 #    ytest = load_preprocessed_ytest()
-    ypred = predict_ML(Xtest, modelname)
+    ypred = make_predictions_ML(Xtest, modelname)
     save_submission_file(ypred, modelname)
 
-def test_neural_net(modelname = "NEURAL_NET"):
+def NN_predict(modelname):
     Xtest = load_preprocessed_Xtest()
 #    ytest = load_preprocessed_ytest()
-    ypred = predict_NN(Xtest, modelname)
+    ypred = make_predictions_NN(Xtest, modelname)
     save_submission_file(ypred, modelname)
     

@@ -1,11 +1,11 @@
 from keras import backend as K
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
-from keras.layers import BatchNormalization
+#from keras.layers import BatchNormalization
 from keras.models import load_model
 from config import PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR, PATH_MODELS
 import pandas as pd
-
+from evaluate import evaluate_nn
 
 ###############################################################################
 # LOADING DATA
@@ -55,7 +55,6 @@ def initialize_neural_net(input_shape):
     K.clear_session()
     
     model = Sequential()
-    
     model.add(Dense(7, activation = 'relu', input_shape=(input_shape,)))
     model.add(Dense(20, activation = 'relu' ))
     model.add(Dropout(0.5))
@@ -69,23 +68,19 @@ def initialize_neural_net(input_shape):
     model.compile(optimizer='adam', loss=loss, metrics=['accuracy'])
     return model
 
-def initialize_training():
+def initialize_training(modelname):
     Xtrain, ytrain, input_shape = prepare_data()
     model = initialize_neural_net(input_shape)
-    model.fit(Xtrain, ytrain, epochs = 1, validation_split=0.2, batch_size=400)
-    model.save(f"{PATH_MODELS}NEURAL_NET.model")
-    info = f"{model.summary()}"
-    with open(f"{PATH_MODELS}NEURAL_NET_readme.txt", "w") as text_file:
-        text_file.write(info)
+    history = model.fit(Xtrain, ytrain, epochs = 1, validation_split=0.2, batch_size=400)
+    model.save(f"{PATH_MODELS}{modelname}.model")
+    evaluate_nn(history, model, modelname)
     print("MODEL INITIALIZED AND SAVED")
 
-def continue_training(epochs):
+def continue_training(modelname, epochs):
     Xtrain, ytrain, input_shape = prepare_data()
     model = load_model(f"{PATH_MODELS}NEURAL_NET.model")
-    model.fit(Xtrain, ytrain, epochs = epochs, validation_split=0.2, batch_size=400)
-    model.save(f"{PATH_MODELS}NEURAL_NET.model")
-    info = f"{model.summary()}"
-    with open(f"{PATH_MODELS}NEURAL_NET_readme.txt", "w") as text_file:
-        text_file.write(info)
+    history = model.fit(Xtrain, ytrain, epochs = epochs, validation_split=0.2, batch_size=400)
+    model.save(f"{PATH_MODELS}{modelname}.model")
+    evaluate_nn(history, model, modelname)
     print("CONTINUED TRAINING AND SAVED MODEL")
 
