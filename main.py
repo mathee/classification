@@ -37,8 +37,8 @@ def continue_training_nn(epochs):
 def preprocess_testdata():
     preprocess_testingdata()    
 
-def apply_ML_model():
-    test_ML_model()
+def apply_ML_model(modelname):
+    test_ML_model(modelname)
     
 def apply_nn():
     test_neural_net()

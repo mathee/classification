@@ -2,8 +2,16 @@
 
 from config import PATH_MODELS, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR, SCORING
 from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Lasso
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import ElasticNet
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 from sklearn.externals.joblib import dump
 import pandas as pd
+from evaluate import evaluate_gridsearch
 
 ###############################################################################
 # LOADING DATA
@@ -42,116 +50,49 @@ def gridsearch(Xtrain, ytrain, m, parameter_grid, cv=5):
     return grid
 
 def save_best_model(grid, modelname):
-    info = f'''MODEL: {modelname}
-BEST PARAMS: {grid.best_params_}
-SCORE: {grid.best_score_}\n
-GRIDSEARCH: {grid}\n
-        '''
-    with open(f"{PATH_MODELS}{modelname}_readme.txt", "w") as text_file:
-        text_file.write(info)
     m = grid.best_estimator_
     dump(m, f'{PATH_MODELS}{modelname}.model')
     # load later via: clf = load('filename.model')  # from sklearn.externals.joblib import load
-    return print(info)
 
 ###############################################################################
-# REGRESSION MODELS
-def train_linear_regression(Xtrain, ytrain):
-    from sklearn.linear_model import LinearRegression
-    '''for non-binary regression problems''' 
-    modelname = "LINEAR_REGRESSION"
-    m = LinearRegression()
-    ytrain = reshape_y(ytrain)
-    params = {}
-    grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
-    save_best_model(grid, modelname)
-    
-def train_lasso_regression(Xtrain, ytrain):
-    from sklearn.linear_model import Lasso
-    '''for non-binary regression problems''' 
-    modelname = "LASSO_REGRESSION"
-    m = Lasso()
-    ytrain = reshape_y(ytrain)
-    params = {"alpha":[0.4, 0.5, 0.6]}
-    grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
-    save_best_model(grid, modelname)
-    
-def train_ridge_regression(Xtrain, ytrain):
-    from sklearn.linear_model import Ridge
-    '''for non-binary regression problems''' 
-    modelname = "RIDGE_REGRESSION"
-    m = Ridge()
-    ytrain = reshape_y(ytrain)
-    params = {"alpha":[0.01, 0.02]}
-    grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
-    save_best_model(grid, modelname)
-    
-def train_elasticnet(Xtrain, ytrain):
-    from sklearn.linear_model import ElasticNet
-    '''for non-binary regression problems''' 
-    modelname = "ELASTICNET_REGRESSION"
-    m = ElasticNet()
-    ytrain = reshape_y(ytrain)
-    params = {"alpha" : [0.5], "l1_ratio" : [0.5]}
-    grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
-    save_best_model(grid, modelname)
+# CLASSIFICATION/REGRESSION GRIDSEARCH
 
-###############################################################################
-# CLASSIFICATION MODELS
-def train_logistic_regression(Xtrain, ytrain):
-    from sklearn.linear_model import LogisticRegression
-    modelname = "LOGISTIC_REGRESSION"
-    m = LogisticRegression()    
-    ytrain = reshape_y(ytrain)
-    c_params = []
-    for i in range(14, 20, 1):
-        c_params.append(i / 100.0)
-    penalty_types = ["l1", "l2"]
-    params = {"penalty":penalty_types,
-              "C":c_params}    
-    grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
-    save_best_model(grid, modelname)
+def get_parameters(modelname):
+    '''define here the parameter search spaces for specific models'''
+    if modelname == "RANDOM_FOREST":
+        n_estimators = [i for i in range(16, 18)]
+        depths = [i for i in range(11, 13)]
+        parameters = {"n_estimators":n_estimators,
+                  "max_depth" : depths} 
+        return parameters
+    elif modelname == "LINEAR_REGRESSION": # etc.
+        return {}
+    else: 
+        return {}
 
-def train_random_forest(Xtrain, ytrain):
-    from sklearn.ensemble import RandomForestClassifier
-    modelname = "RANDOM_FOREST"
-    m = RandomForestClassifier(random_state=42)    
+def train_grid(Xtrain, ytrain, modelname, model, parameters):
+    '''logistic regression, random forest, support vector machines,
+    linear regression, ridge regression, lasso regression, elasticnet'''
     ytrain = reshape_y(ytrain)
-    trees = []
-    for i in range(16, 17):
-        trees.append(i)
-    depths = []
-    for i in range(11, 12):
-        depths.append(i)
-    params = {"n_estimators":trees,
-              "max_depth" : depths}    
-    grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
+    grid = gridsearch(Xtrain, ytrain, model, parameters, cv=5)
     save_best_model(grid, modelname)
-
-def train_SVC(Xtrain, ytrain):
-    from sklearn.svm import SVC
-    modelname = "SUPPORT_VECTOR_MACHINE"
-    m = SVC()    
-    ytrain = reshape_y(ytrain)
-    c_params_svm = []
-    for i in range(8, 12, 1): # e.g. 60 --> c 0.60
-        c_params_svm.append(i / 100.0)
-    kernels = ["rbf"]
-    gammas = []
-    for i in range(6, 12, 1): # e.g. 60 --> c 6.0
-        gammas.append(i)
-    gammas.append("auto")
-    params = {"C":c_params_svm,
-              "kernel": kernels,
-              "gamma": gammas}    
-    grid = gridsearch(Xtrain, ytrain, m, params, cv=5)
-    save_best_model(grid, modelname)
+    evaluate_gridsearch(Xtrain, ytrain, grid, modelname)
     
 ###############################################################################
 # MAIN FUNCTION
 def main():
     Xtrain = load_preprocessed_Xtrain()
     ytrain = load_preprocessed_ytrain()
-    train_random_forest(Xtrain, ytrain)
+    
+    train_grid(Xtrain, ytrain, 
+               "RANDOM_FOREST", 
+               RandomForestClassifier(random_state=42), 
+               get_parameters("RANDOM_FOREST"))
+    
+    train_grid(Xtrain, ytrain, 
+               "LOGISTIC_REGRESSION", 
+               LogisticRegression(), 
+               get_parameters("LOGISTIC_REGRESSION"))
+    
 
 

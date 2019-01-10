@@ -9,6 +9,8 @@ import pandas as pd
 from keras.models import load_model
 from keras import backend as K
 
+###############################################################################
+# DATA LOADING / SAVING
 
 def load_preprocessed_Xtest():
     X = pd.read_csv(PATH_XTEST_PREPROCESSED, sep = SEPARATOR)
@@ -25,11 +27,11 @@ def load_submission_file():
     print(f"LOADED EMPTY SUBMISSION FILE FROM DISC\n")
     return submission
 
-def save_submission_file(ypred):
+def save_submission_file(ypred, modelname):
     '''optional, dave file for competition submission, e.g. kaggle'''
     submission_file = load_submission_file()
     submission_file[Y_COLUMN[0]] = ypred
-    submission_file.to_csv(PATH_SUBMISSION_FILE, index = False, sep = ",")    
+    submission_file.to_csv(f"{PATH_SUBMISSION_FILE}_{modelname}.csv", index = False, sep = ",")    
     print(f"SAVED SUBMISSION FILE\n")
 
 ###############################################################################
@@ -39,7 +41,8 @@ def predict_ML(Xtest, modelname):
     path = f"{PATH_MODELS}{modelname}.model"
     m = load(path)
     y = m.predict(Xtest)
-    print(f"MADE PREDICTIONS\n")
+    y = y.round(0).astype(int) # for binary problems, turns probabilites into 1 or 0
+    print(f"MADE PREDICTIONS WITH {modelname}\n")
     #OR m.predict_proba(Xtest)[:,1] to receive probabilites, if outcome should not be binary
     return y
     
@@ -53,15 +56,18 @@ def predict_NN(Xtest, nn_name):
     print(f"MADE PREDICTIONS\n")
     return y
 
-def test_ML_model():
-    Xtest = load_preprocessed_Xtest()
-#    ytest = load_preprocessed_ytest()
-    ypred = predict_ML(Xtest, "RANDOM_FOREST")
-    save_submission_file(ypred)
+###############################################################################
+# MAIN
 
-def test_neural_net():
+def test_ML_model(modelname):
     Xtest = load_preprocessed_Xtest()
 #    ytest = load_preprocessed_ytest()
-    ypred = predict_NN(Xtest, "NEURAL_NET")
-    save_submission_file(ypred)
+    ypred = predict_ML(Xtest, modelname)
+    save_submission_file(ypred, modelname)
+
+def test_neural_net(modelname = "NEURAL_NET"):
+    Xtest = load_preprocessed_Xtest()
+#    ytest = load_preprocessed_ytest()
+    ypred = predict_NN(Xtest, modelname)
+    save_submission_file(ypred, modelname)
     
