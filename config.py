@@ -2,6 +2,8 @@
 ''' pathes to files that contain the raw data for xtrain, ytrain, xtest, ytest'''
 CHUNKSIZE_TRAIN = 5000000
 CHUNKSIZE_TEST = 5000000
+
+SEPARATOR = "|"
 ###############################################################################
 # CHOOSE FILE PATHES
 """
@@ -33,8 +35,6 @@ PATH_YTEST = "data/pubg_test.csv"
 ID_COLUMN_LABEL = "Id"
 Y_COLUMN = ["winPlacePerc"]
 """
-
-
 PATH_XTRAIN_PREPROCESSED = "data/preprocessed/Xtrain_preprocessed.csv"
 PATH_YTRAIN_PREPROCESSED = "data/preprocessed/ytrain_preprocessed.csv"
 PATH_XTEST_PREPROCESSED = "data/preprocessed/Xtest_preprocessed.csv"
@@ -42,5 +42,3 @@ PATH_YTEST_PREPROCESSED = "data/preprocessed/ytest_preprocessed.csv"
 PATH_SUBMISSION_FILE_PREP = "results/temp.csv"
 PATH_SUBMISSION_FILE = "results/submission"#_{modelname}.csv
 PATH_MODELS = "models/"
-
-SEPARATOR = "|"
