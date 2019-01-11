@@ -8,6 +8,7 @@ from sklearn.linear_model import Lasso
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import ElasticNet
 from sklearn.linear_model import LogisticRegression
+import xgboost as xgb
 from sklearn.svm import SVC
 from sklearn.externals.joblib import dump
 import pandas as pd
@@ -97,7 +98,14 @@ def main(modelname):
                    LogisticRegression(), 
                    get_parameters("LOGISTIC_REGRESSION"),
                    scoring = "accuracy",
-                   cv = 5)        
+                   cv = 5)
+    elif modelname == "XGBOOST":
+        train_grid(Xtrain, ytrain, 
+                   "XGBOOST", 
+                   xgb.XGBClassifier(), 
+                   get_parameters("XGBOOST"),
+                   scoring = "accuracy",
+                   cv = 5)     
     elif modelname == "LINEAR_REGRESSION":
         train_grid(Xtrain, ytrain, 
                    "LINEAR_REGRESSION", 

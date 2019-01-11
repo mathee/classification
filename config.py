@@ -6,13 +6,14 @@ CHUNKSIZE_TEST = 5000000
 SEPARATOR = "|"
 ###############################################################################
 # CHOOSE FILE PATHES
-"""
+
 PATH_XTRAIN = "data/titanic_train.csv"
 PATH_YTRAIN = "data/titanic_train.csv"
 PATH_XTEST = "data/titanic_test.csv"
 PATH_YTEST = "data/titanic_test.csv"
 ID_COLUMN_LABEL = "PassengerId"
 Y_COLUMN = ["Survived"]
+SUBMISSION_TYPE = "int"
 """
 PATH_XTRAIN = "data/microsoft_train.csv"
 PATH_YTRAIN = "data/microsoft_train.csv"
@@ -20,13 +21,15 @@ PATH_XTEST = "data/microsoft_test.csv"
 PATH_YTEST = "data/microsoft_test.csv"
 ID_COLUMN_LABEL = "MachineIdentifier"
 Y_COLUMN = ["HasDetections"]
-"""
+SUBMISSION_TYPE = "float"
+
 PATH_XTRAIN = "data/housing_train.csv"
 PATH_YTRAIN = "data/housing_train.csv"
 PATH_XTEST = "data/housing_test.csv"
 PATH_YTEST = "data/housing_test.csv"
 ID_COLUMN_LABEL = "Id"
 Y_COLUMN = ["SalePrice"]
+SUBMISSION_TYPE = "float"
 
 PATH_XTRAIN = "data/pubg_train.csv"
 PATH_YTRAIN = "data/pubg_train.csv"
@@ -34,6 +37,7 @@ PATH_XTEST = "data/pubg_test.csv"
 PATH_YTEST = "data/pubg_test.csv"
 ID_COLUMN_LABEL = "Id"
 Y_COLUMN = ["winPlacePerc"]
+SUBMISSION_TYPE = "float"
 """
 PATH_XTRAIN_PREPROCESSED = "data/preprocessed/Xtrain_preprocessed.csv"
 PATH_YTRAIN_PREPROCESSED = "data/preprocessed/ytrain_preprocessed.csv"

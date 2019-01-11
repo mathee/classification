@@ -270,7 +270,7 @@ def preprocessing_Xtrain(path):
     X = scaling(X, (0,1))  
     X = select_high_variance_threshold(X, threshold=0.001)
     X = clip_outliers(X, 0.02, 0.98)
-    X = select_k_best_features(X, y, 30) #26 works best for random forest, 60 for nn
+    X = select_k_best_features(X, y, 7) #26 works best for random forest, 60 for nn
     X = scaling(X, (-1,1))
     return X, y 
 
