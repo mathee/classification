@@ -7,8 +7,8 @@ __pycache__/
 *.so
 
 # data
-data/
-data_sources/
+*.csv
+*.zip
 
 # Distribution / packaging
 .Python
