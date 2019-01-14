@@ -7,7 +7,7 @@ from preprocess_train import main as preprocess_trainingdata
 from preprocess_test import main as preprocess_testingdata
 from train_ML import main as train_model
 from train_NN import initialize_training, continue_training
-from predict import ML_predict, NN_predict
+from predict import ML_predict, NN_predict, combine_submission_chunks
 
 
 ###############################################################################
@@ -37,8 +37,13 @@ def continue_training_nn(modelname, epochs):
 def preprocess_testdata():
     preprocess_testingdata()    
 
-def apply_ML(modelname):
-    ML_predict(modelname)
+def apply_ML(modelname, chunk_start, chunk_end):
+    ML_predict(modelname, chunk_start, chunk_end)
     
-def apply_NN(modelname):
-    NN_predict(modelname)
+def apply_NN(modelname, chunk_start, chunk_end):
+    NN_predict(modelname, chunk_start, chunk_end)
+    
+##############################################################################
+# COMBINE SUBMISSION FILE CHUNKS
+def create_submission_file(modelname):
+    combine_submission_chunks(modelname)

@@ -1,28 +1,31 @@
 import pandas as pd
-from config import Y_COLUMN, PATH_MODELS, PATH_XTEST, PATH_YTEST, ID_COLUMN_LABEL, CHUNKSIZE_TEST, PATH_XTEST_PREPROCESSED, PATH_YTEST_PREPROCESSED, SEPARATOR, PATH_SUBMISSION_FILE_PREP
+from config import Y_COLUMN, PATH_MODELS, CHUNKS_TEST, PATH_XTEST, PATH_YTEST, ID_COLUMN_LABEL, CHUNKSIZE_TEST, PATH_XTEST_PREPROCESSED, SEPARATOR, PATH_SUBMISSION_FILE_PREP
 from feature_engineering import engineer_test as feature_engineer_test
 import pickle
 
 ###############################################################################
 
-def load_chunk(path):
-    iter_csv = pd.read_csv(path, iterator=True, chunksize=CHUNKSIZE_TEST) #usecols = X_COLUMNS
-    df = next(iter_csv)
+def load_iterator(path=PATH_XTEST, chunksize=CHUNKSIZE_TEST):
+    iter_csv = pd.read_csv(path, iterator=True, chunksize=chunksize)
+    return iter_csv
+
+def load_chunk(iterator):
+    df = next(iterator)
     id_column = df[ID_COLUMN_LABEL]
-    print(f"AFTER LOADING: {type(df)} - {df.shape}\n")
+    print(f"AFTER LOADING: {type(df)} - {df.shape}")
     return df, id_column
 
 def apply_column_structure_of_train(X):
     with open(f'{PATH_MODELS}support/trainingdata.structure', 'rb') as handle:
         trainingdata_structure = pickle.load(handle) # dataframe
     a1, a2 = X.align(trainingdata_structure, join='right', axis=1)
-    print(f"ALIGNED COLUMN STRUCTURE: {type(a1)} - {a1.shape}\n")
+    print(f"ALIGNED COLUMN STRUCTURE: {type(a1)} - {a1.shape}")
     return a1
 
 def apply_one_hot_encoding(X):
     object_columns = list(X.select_dtypes(include=['object']))
     X = pd.get_dummies(X, prefix=object_columns)
-    print(f"ONE-HOT-ENCODING: {type(X)} - {X.shape}\n")
+    print(f"ONE-HOT-ENCODING: {type(X)} - {X.shape}")
     return X
 
 def apply_factorization_encoding(X):
@@ -31,7 +34,7 @@ def apply_factorization_encoding(X):
         with open(f'{PATH_MODELS}support/factorization_encoder_{col}.dict', 'rb') as handle:
             mapping = pickle.load(handle)
         X[col]= X[col].map(mapping).fillna(-1).astype(int)
-    print(f"APPLIED FACTORIZATION ENCODING: {type(X)} - {X.shape}\n")
+    print(f"APPLIED FACTORIZATION ENCODING: {type(X)} - {X.shape}")
     return X
 
 def apply_imputation(X):
@@ -41,7 +44,7 @@ def apply_imputation(X):
         with open(f'{PATH_MODELS}support/imputer_{col}.model', 'rb') as handle:
             imp = pickle.load(handle)
         X[col] = imp.transform(X[col].values.reshape(-1, 1))
-    print(f"APPLIED IMPUTATION: {type(X)} - {X.shape}\n")
+    print(f"APPLIED IMPUTATION: {type(X)} - {X.shape}")
     return X
 
 def apply_scaling(X, feature_range):
@@ -51,7 +54,7 @@ def apply_scaling(X, feature_range):
         with open(f'{PATH_MODELS}support/scaler{feature_range}{columnlabel}.model', 'rb') as handle:
             scaler = pickle.load(handle)
         X[columnlabel] = scaler.transform(X[columnlabel].values.reshape(-1, 1))
-    print(f"APPLIED SCALING {feature_range}: {type(X)} - {X.shape}\n")
+    print(f"APPLIED SCALING {feature_range}: {type(X)} - {X.shape}")
     return X
 
 def apply_PCA(X):
@@ -63,20 +66,16 @@ def apply_PCA(X):
 
 ############################################################################### 
 # SAVING
+
+def save_preprocessed_Xtest(X, chunk):
+    X.to_csv(f"{PATH_XTEST_PREPROCESSED}_{chunk}.csv", index = False, sep = SEPARATOR)
+    print(f"SAVED Xtest CHUNK {chunk} TO DISC\n")    
     
-def save_preprocessed_Xtest(X):
-    X.to_csv(PATH_XTEST_PREPROCESSED, index = False, sep = SEPARATOR)
-    print(f"SAVED Xtest TO DISC")
-    
-def save_preprocessed_ytest(y):
-    y.to_csv(PATH_YTEST_PREPROCESSED, index = False, sep = SEPARATOR)    
-    print(f"SAVED ytest TO DISC")
-    
-def save_submission_frame(id_column):
+def save_submission_frame(id_column, chunk):
     '''optional, prepare file for competition submission, e.g. kaggle'''
     submission = pd.DataFrame(id_column, columns=[ID_COLUMN_LABEL])
-    submission.to_csv(PATH_SUBMISSION_FILE_PREP, index = False, sep = SEPARATOR)    
-    print(f"PREPARED SUBMISSION FILE")
+    submission.to_csv(f"{PATH_SUBMISSION_FILE_PREP}_{chunk}.csv", index = False, sep = SEPARATOR)    
+    print(f"PREPARED SUBMISSION FILE CHUNK {chunk}\n")
     
     
 ############################################################################### 
@@ -98,13 +97,14 @@ def preprocessing_ytest(path=PATH_YTEST):
 
 def main():
     '''prepares and returns X, y'''
-    X, id_column_for_submission  = preprocessing_Xtest()
-    X = feature_engineer_test(X)
-    save_preprocessed_Xtest(X)
-#    y = preprocessing_ytest()
-#    y = y.values.reshape(-1,)
-#    save_preprocessed_ytest(y)
-    save_submission_frame(id_column_for_submission)
-
-#preprocessing_Xtest("data/test.csv")
+    iterator = load_iterator()
+    for chunk in range(CHUNKS_TEST):
+        print(f"\nCHUNK_{chunk}__________\n")
+        X, id_column_for_submission  = preprocessing_Xtest(iterator)
+        X = feature_engineer_test(X)
+        save_preprocessed_Xtest(X, chunk)
+    #    y = preprocessing_ytest()
+    #    y = y.values.reshape(-1,)
+    #    save_preprocessed_ytest(y)
+        save_submission_frame(id_column_for_submission, chunk)
     
