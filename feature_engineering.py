@@ -1,14 +1,11 @@
-""" script contains problem-specifc feature engineering steps/functions that 
+"""SPECIFIC FEATURE ENGINEERING:
+script contains problem-specifc feature engineering steps/functions that 
 create new features - going beyond standardized, automated preprocessing steps 
 like scaling/encoding/deleting. --> Everything that requires domain knowledge.
-INPUT: DataFrame
-OUTPUT: DataFrame
-"""
-
-###############################################################################
-# GENERAL FUNCTIONS
-
 # FIND AND CREATE INTERSECTION TERMS
+"""
+###############################################################################
+# FUNCTIONS
 
 def create_shifted_columns(df, column_name, min_shift, max_shift, shift_stepsize, prefix):
     '''For timeseries: Creates shifted columns for [column_name], in range of min-max-step,
@@ -24,12 +21,21 @@ def create_polynomials(df, column_name, min_power, max_power, stepsize, prefix):
     for i in powers:
         df[f"{prefix}({column_name})**{i}"] = df[column_name] ** i
 
+def create_category_combinations(X):
+    object_columns = list(X.select_dtypes(include=['object']))
+    for column1 in object_columns:
+        for column2 in object_columns:
+            X[f"{column1}&{column2}"] = f"{column1}&{column2}"
+    return X
+
 ###############################################################################
 # MAIN FUNCTION
 def engineer_train(X):
+    X = create_category_combinations(X)
     print(f"AFTER FEATURE ENGINEERING: {type(X)} - {X.shape}\n")
     return X
 
 def engineer_test(X):
+    X = create_category_combinations(X)
     print(f"AFTER FEATURE ENGINEERING: {type(X)} - {X.shape}\n")
     return X

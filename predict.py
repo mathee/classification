@@ -1,11 +1,14 @@
-"""this script contains predictions functions, i.e. applying trained models on
+"""PREDICT:
+this script contains predictions functions, i.e. applying trained models on
 a set of preprocessed testdata"""
 
-from config import SUBMISSION_TYPE, PATH_MODELS, CHUNKS_TEST, Y_COLUMN, PATH_XTEST_PREPROCESSED, SEPARATOR, PATH_SUBMISSION_FILE, PATH_SUBMISSION_FILE_PREP
-from sklearn.externals.joblib import load
 import pandas as pd
-from keras.models import load_model
+from sklearn.externals.joblib import load
+from config import (PATH_MODELS, PATH_SUBMISSION_FILE,
+                    PATH_SUBMISSION_FILE_PREP, PATH_XTEST_PREPROCESSED,
+                    SEPARATOR, SUBMISSION_TYPE, Y_COLUMN)
 from keras import backend as K
+from keras.models import load_model
 
 ###############################################################################
 # DATA LOADING / SAVING
@@ -61,25 +64,24 @@ def make_predictions_NN(Xtest, nn_name):
 ###############################################################################
 # MAIN
     
-def ML_predict(modelname, chunk_start, chunk_end):
-    for chunk in range(chunk_start, chunk_end+1):
+def ML_predict(modelname, chunk_first, chunk_last):
+    for chunk in range(chunk_first, chunk_last+1):
         print(f"\nPREDICT CHUNK_{chunk}__________\n")
         Xtest = load_preprocessed_Xtest(chunk)
         ypred = make_predictions_ML(Xtest, modelname)
         save_submission_file(ypred, modelname, chunk)
 
-def NN_predict(modelname, chunk_start, chunk_end):
-    for chunk in range(chunk_start, chunk_end+1): 
+def NN_predict(modelname, chunk_first, chunk_last):
+    for chunk in range(chunk_first, chunk_last+1): 
         print(f"\nPREDICT CHUNK_{chunk}__________\n")
         Xtest = load_preprocessed_Xtest(chunk)
         ypred = make_predictions_NN(Xtest, modelname)
         save_submission_file(ypred, modelname, chunk)
 
-def combine_submission_chunks(modelname):
+def combine_submission_chunks(modelname, chunk_first, chunk_last):
     dfs = []
-    for chunk in range(CHUNKS_TEST):
+    for chunk in range(chunk_first, chunk_last+1):
         dfs.append(pd.read_csv(f"{PATH_SUBMISSION_FILE}_{modelname}_{chunk}.csv",  sep = ","))
     combined = pd.concat(dfs, ignore_index=False)
     combined.to_csv(f"{PATH_SUBMISSION_FILE}_{modelname}_combined.csv", index = False, sep = ",")   
-    print(f"CREATED COMBINED SUBMISSION FILE OUT OF {CHUNKS_TEST} CHUNKS")
-        
+    print(f"CREATED COMBINED SUBMISSION FILE")

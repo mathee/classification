@@ -1,13 +1,10 @@
 """this script contains evaluation functions for training / testing model
-performance"""
+performance
+"""
 
-from config import PATH_MODELS
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import precision_score
-from sklearn.metrics import recall_score
 import pandas as pd
-
-# add ROC matrix
+from sklearn.metrics import confusion_matrix, precision_score, recall_score
+from config import PATH_MODELS
 
 ###############################################################################
 # EVALUATE GRIDSEARCH TRAINING PERFORMANCE

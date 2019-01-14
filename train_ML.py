@@ -1,18 +1,17 @@
-"""Model training"""
+"""TRAIN MODEL"""
 
-from config import PATH_MODELS, PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import Lasso
-from sklearn.linear_model import Ridge
-from sklearn.linear_model import ElasticNet
-from sklearn.linear_model import LogisticRegression
-import xgboost as xgb
-from sklearn.svm import SVC
-from sklearn.externals.joblib import dump
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.externals.joblib import dump
+from sklearn.linear_model import (ElasticNet, Lasso, LinearRegression,
+                                  LogisticRegression, Ridge)
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
+import xgboost as xgb
+from config import (PATH_MODELS, PATH_XTRAIN_PREPROCESSED,
+                    PATH_YTRAIN_PREPROCESSED, SEPARATOR)
 from evaluate import evaluate_gridsearch
+
 
 ###############################################################################
 # LOADING DATA

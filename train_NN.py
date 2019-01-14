@@ -1,23 +1,25 @@
+"""TRAIN NEURAL NETS"""
+
+import pandas as pd
+from config import (PATH_MODELS, PATH_XTRAIN_PREPROCESSED,
+                    PATH_YTRAIN_PREPROCESSED, SEPARATOR)
+from evaluate import evaluate_nn
 from keras import backend as K
-from keras.models import Sequential
 from keras.layers import Dense, Dropout
 #from keras.layers import BatchNormalization
-from keras.models import load_model
-from config import PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED, SEPARATOR, PATH_MODELS
-import pandas as pd
-from evaluate import evaluate_nn
+from keras.models import Sequential, load_model
 
 ###############################################################################
 # LOADING DATA
 
 def load_preprocessed_Xtrain():
     X = pd.read_csv(PATH_XTRAIN_PREPROCESSED, sep = SEPARATOR)
-    print(f"LOADED Xtest FROM DISC")
+    print(f"LOADED Xtrain FROM DISC")
     return X
     
 def load_preprocessed_ytrain():
     y = pd.read_csv(PATH_YTRAIN_PREPROCESSED,  sep = SEPARATOR)    
-    print(f"LOADED ytest FROM DISC")
+    print(f"LOADED ytrain FROM DISC")
     return y
 
 ###############################################################################
@@ -54,11 +56,13 @@ def prepare_data():
 def initialize_neural_net(input_shape):
     K.clear_session()
     
+    # MODEL DESIGN
     model = Sequential()
-    model.add(Dense(7, activation = 'relu', input_shape=(input_shape,)))
-    model.add(Dense(20, activation = 'relu' ))
+    model.add(Dense(60, activation = 'relu', input_shape=(input_shape,)))
+    model.add(Dense(120, activation = 'relu' ))
     model.add(Dropout(0.5))
-    model.add(Dense(20, activation = 'relu' ))
+    model.add(Dense(60, activation = 'relu' ))
+    model.add(Dropout(0.2))
     model.add(Dense(1, activation = 'sigmoid'))
     
 #    loss = "categorical_crossentropy"
@@ -71,16 +75,15 @@ def initialize_neural_net(input_shape):
 def initialize_training(modelname):
     Xtrain, ytrain, input_shape = prepare_data()
     model = initialize_neural_net(input_shape)
-    history = model.fit(Xtrain, ytrain, epochs = 1, validation_split=0.2, batch_size=400)
+    history = model.fit(Xtrain, ytrain, epochs = 1, validation_split=0.2, batch_size=100)
     model.save(f"{PATH_MODELS}{modelname}.model")
     evaluate_nn(history, model, modelname)
     print("MODEL INITIALIZED AND SAVED")
 
 def continue_training(modelname, epochs):
     Xtrain, ytrain, input_shape = prepare_data()
-    model = load_model(f"{PATH_MODELS}NEURAL_NET.model")
-    history = model.fit(Xtrain, ytrain, epochs = epochs, validation_split=0.2, batch_size=400)
+    model = load_model(f"{PATH_MODELS}{modelname}.model")
+    history = model.fit(Xtrain, ytrain, epochs = epochs, validation_split=0.2, batch_size=100)
     model.save(f"{PATH_MODELS}{modelname}.model")
     evaluate_nn(history, model, modelname)
     print("CONTINUED TRAINING AND SAVED MODEL")
-

@@ -1,13 +1,20 @@
-# columns to be loaded from original csv, for training and testing
 ''' pathes to files that contain the raw data for xtrain, ytrain, xtest, ytest'''
-CHUNKSIZE_TRAIN = 5000000
-CHUNKSIZE_TEST = 200 # iterator chunk sizes for loading testdata
-CHUNKS_TEST = 3 # chunks of testdata to be preprocessed
-
-SEPARATOR = "|"
 ###############################################################################
-# CHOOSE FILE PATHES
-
+# GENERAL SETTINGS
+TRAININGSET_SIZE = 4000000 # number of rows loaded from train.csv to be used as training data
+CHUNKSIZE_TEST = 1000000 # iterator chunk sizes for loading testdata
+#CHUNKS_TEST = 10 # chunks of testdata to be preprocessed
+SEPARATOR = "|" # separator for saving preprocessed files, to avoid confusion with "," values in file
+###############################################################################
+# PATHES
+PATH_XTRAIN = "data/microsoft_train.csv"
+PATH_YTRAIN = "data/microsoft_train.csv"
+PATH_XTEST = "data/microsoft_test.csv"
+PATH_YTEST = "data/microsoft_test.csv"
+ID_COLUMN_LABEL = "MachineIdentifier" # name/label of identifier column
+Y_COLUMN = ["HasDetections"] # column to be predicted, save here as list
+SUBMISSION_TYPE = "float" # datatype of predicted values, used in postprocess_ypred
+"""
 PATH_XTRAIN = "data/titanic_train.csv"
 PATH_YTRAIN = "data/titanic_train.csv"
 PATH_XTEST = "data/titanic_test.csv"
@@ -15,14 +22,6 @@ PATH_YTEST = "data/titanic_test.csv"
 ID_COLUMN_LABEL = "PassengerId"
 Y_COLUMN = ["Survived"]
 SUBMISSION_TYPE = "int"
-"""
-PATH_XTRAIN = "data/microsoft_train.csv"
-PATH_YTRAIN = "data/microsoft_train.csv"
-PATH_XTEST = "data/microsoft_test.csv"
-PATH_YTEST = "data/microsoft_test.csv"
-ID_COLUMN_LABEL = "MachineIdentifier"
-Y_COLUMN = ["HasDetections"]
-SUBMISSION_TYPE = "float"
 
 PATH_XTRAIN = "data/housing_train.csv"
 PATH_YTRAIN = "data/housing_train.csv"
