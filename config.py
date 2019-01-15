@@ -1,9 +1,6 @@
 ''' pathes to files that contain the raw data for xtrain, ytrain, xtest, ytest'''
 ###############################################################################
 # GENERAL SETTINGS
-TRAININGSET_SIZE = 400 # number of rows loaded from train.csv to be used as training data
-CHUNKSIZE_TEST = 1000000 # iterator chunk sizes for loading testdata
-#CHUNKS_TEST = 10 # chunks of testdata to be preprocessed
 SEPARATOR = "|" # separator for saving preprocessed files, to avoid confusion with "," values in file
 ###############################################################################
 # PATHES

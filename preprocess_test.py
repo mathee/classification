@@ -4,14 +4,14 @@ as the preprocessed trainingdata that the model has been trained on."""
 
 import pickle
 import pandas as pd
-from config import (CHUNKSIZE_TEST, ID_COLUMN_LABEL, PATH_MODELS,
+from config import (ID_COLUMN_LABEL, PATH_MODELS,
                     PATH_SUBMISSION_FILE_PREP, PATH_XTEST,
                     PATH_XTEST_PREPROCESSED, PATH_YTEST, SEPARATOR, Y_COLUMN)
 from feature_engineering import engineer_test as feature_engineer_test
 
 ###############################################################################
 
-def load_iterator(path=PATH_XTEST, chunksize=CHUNKSIZE_TEST):
+def load_iterator(chunksize, path=PATH_XTEST):
     '''loads the iterator which is used to generate chunks of the testset
     to make predictions on'''
     iter_csv = pd.read_csv(path, iterator=True, chunksize=chunksize)
@@ -124,9 +124,9 @@ def preprocessing_ytest(path=PATH_YTEST):
     y = next(iter_csv)
     return y
 
-def main():
+def main(chunksize):
     '''prepares and returns X, y'''
-    iterator = load_iterator()
+    iterator = load_iterator(chunksize)
     chunk = 0
     while True:
         print(f"\nCHUNK_{chunk}__________\n")

@@ -8,6 +8,8 @@ from keras import backend as K
 from keras.layers import Dense, Dropout
 #from keras.layers import BatchNormalization
 from keras.models import Sequential, load_model
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import cross_val_score
 
 ###############################################################################
 # LOADING DATA
@@ -54,8 +56,8 @@ def prepare_data():
     ytrain = tweak_y(ytrain)
     return Xtrain, ytrain
 
-def initialize_neural_net(input_shape):
-
+def initialize_neural_net():
+    input_shape = get_input_shape()
     K.clear_session()
     
     # MODEL DESIGN
@@ -76,8 +78,7 @@ def initialize_neural_net(input_shape):
 
 def initialize_model(modelname):
     '''initialize model and train one initial epoch'''
-    input_shape = get_input_shape()
-    model = initialize_neural_net(input_shape)
+    model = initialize_neural_net()
     #history = model.fit(Xtrain, ytrain, epochs = 1, validation_split=0.2, batch_size=100)
     model.save(f"{PATH_MODELS}{modelname}.model")
     save_model_summary(model, modelname)
@@ -94,12 +95,15 @@ def perform_training(modelname, epochs):
 #    evaluate_nn(history, model, modelname)
     print("CONTINUED TRAINING AND SAVED MODEL")
 
-
-def gridsearch_kfold(modelname, epochs, folds):
-    '''for small datasets, use similar approach as with ML models, scikit-learn
-    wrapper for Keras, then gridsearch with kfold CV'''
-    Xtrain, ytrain, input_shape = prepare_data()
-    skf = StratifiedKFold(n_splits=folds)
-    skf.get_n_splits(Xtrain, ytrain)
-    for i, (train, test) in enumerate(skf):
-        input_shape = get_input_shape(Xtrain)
+def cv_kfold(epochs, folds):
+    '''for small datasets, create NN, then do k-fold crossvalidation on it'''
+    Xtrain, ytrain = prepare_data()
+  #  ytrain = ytrain.values.reshape(-1,)
+#    model = load_model(f"{PATH_MODELS}{modelname}.model")
+    
+    neural_network = KerasClassifier(build_fn=initialize_neural_net, 
+                                 epochs=epochs, 
+                                 batch_size=100, 
+                                 verbose=1)
+    print(cross_val_score(neural_network, Xtrain, ytrain, cv=folds))
+    

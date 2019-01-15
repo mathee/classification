@@ -5,7 +5,7 @@ from predict import ML_predict, NN_predict, combine_submission_chunks
 from preprocess_test import main as preprocess_testingdata
 from preprocess_train import main as preprocess_trainingdata
 from train_ML import main as train_model
-from train_NN import perform_training, initialize_model
+from train_NN import perform_training, initialize_model, cv_kfold
 
 ###############################################################################
 # DATA PREPARATION
@@ -16,9 +16,9 @@ def wrangle_data():
     wrangle_testdata()
 """
 
-def preprocess_traindata(): # set trainingset size in config
+def preprocess_traindata(trainingset_size): # set trainingset size in config
     '''preprocess trainingdata as defined in preprocess_train.py'''
-    preprocess_trainingdata()
+    preprocess_trainingdata(trainingset_size)
     
 ###############################################################################
 # TRAIN ML MODEL
@@ -31,13 +31,19 @@ def initialize_nn(modelname):
     initialize_model(modelname)
     
 def perform_training_nn(modelname, epochs):
+    '''perform initial training / continuation of training using Keras API, for big 
+    datasets'''
     perform_training(modelname, epochs)
+    
+def cv_nn(epochs, folds):
+    '''for smaller datasets, create NN, then do k-fold cross-validation on it'''
+    cv_kfold(epochs, folds)
 
 ###############################################################################
 # APPLY MODEL ON UNSEEN DATA (PREDICT ON TEST) 
-def preprocess_testdata(): # set chunksize of testdata in config
+def preprocess_testdata(chunksize): # set chunksize < dataset to predict on chunks
     # ! BE SURE PROCESS MATCHES PREPROCESSING OF TRAININGDATA
-    preprocess_testingdata()    
+    preprocess_testingdata(chunksize)    
 
 def predict_chunks_ML(modelname, chunk_first, chunk_last):
     ML_predict(modelname, chunk_first, chunk_last)

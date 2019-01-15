@@ -9,13 +9,13 @@ import pandas as pd
 from scipy import stats
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import (SelectFromModel, SelectKBest,
-                                       VarianceThreshold, chi2)
+                                       VarianceThreshold, chi2, f_classif)
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import Lasso
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import LinearSVC
-from config import (TRAININGSET_SIZE, PATH_MODELS, PATH_XTRAIN,
+from config import (PATH_MODELS, PATH_XTRAIN,
                     PATH_XTRAIN_PREPROCESSED, PATH_YTRAIN_PREPROCESSED,
                     SEPARATOR, Y_COLUMN)
 from feature_engineering import engineer_train as feature_engineer_train
@@ -168,9 +168,11 @@ def select_tree_based(X, y, n_estimators):
     print(f"AFTER TREE-BASED SELECTION: {type(X)} - {X.shape}\n")
     return X
 
-def select_k_best_features(X, y, k):
-    '''works only for postivie values, so scaling needs to be done before'''
-    selector = SelectKBest(chi2, k)
+def select_k_best_features(X, y, k, stat):
+    '''works only for postivie values, so scaling needs to be done before
+    choose chi2 or f_classif as stat'''
+    y = y.values.reshape(-1,)
+    selector = SelectKBest(stat, k)
     selector.fit(X, y)
     feature_indices = selector.get_support(indices = True)
     features = [column for column in X] #Array of all nonremoved features' names
@@ -288,9 +290,9 @@ def save_preprocessed_ytrain(y):
 ############################################################################### 
 # MAIN FUNCTIONS
 
-def main():
+def main(trainingset_size):
     '''preprocesses and save X,y for model training'''
-    X = load_chunk(PATH_XTRAIN, chunksize=TRAININGSET_SIZE)
+    X = load_chunk(PATH_XTRAIN, chunksize=trainingset_size)
     X, y = drop_y_from_X(X) #--> decouple y from X at this point, only AFTER row deletions (!)
 #    X = feature_engineer_train(X)
     X = factorization_encoding(X)
@@ -299,8 +301,8 @@ def main():
     X = scaling(X, (0,1))  
 #    X = select_high_variance_threshold(X, threshold=0.001)
     X = clip_outliers(X, 0.02, 0.98)
-    X = select_tree_based(X, y, 10)
-#    X = select_k_best_features(X, y, 50) #26 works best for random forest, 60 for nn
+#    X = select_tree_based(X, y, 10)
+    X = select_k_best_features(X, y, 50, f_classif) #26 works best for random forest, 60 for nn
     X = scaling(X, (-1,1)) # scaling -1,1 for best NN performance
     save_preprocessed_Xtrain(X)
     save_preprocessed_ytrain(y)
