@@ -2,7 +2,12 @@
 script contains problem-specifc feature engineering steps/functions that 
 create new features - going beyond standardized, automated preprocessing steps 
 like scaling/encoding/deleting. --> Everything that requires domain knowledge.
-# FIND AND CREATE INTERSECTION TERMS
+
+todo:
+# INTERACTION TERMS (A*B, A/B, A**B)
+# POLYNOMIALS (A**2, A**3, log(A) etc.)
+# SHIFTED COLUMNS (B = A+t1)
+# BINNING, TURN COLUMN INTO CATEGORICAL
 """
 ###############################################################################
 # FUNCTIONS
