@@ -3,7 +3,7 @@
 import pandas as pd
 from config import (PATH_MODELS, PATH_XTRAIN_PREPROCESSED,
                     PATH_YTRAIN_PREPROCESSED, SEPARATOR)
-from evaluate import evaluate_nn
+from evaluate import save_model_summary, save_learning_history
 from keras import backend as K
 from keras.layers import Dense, Dropout
 #from keras.layers import BatchNormalization
@@ -25,7 +25,9 @@ def load_preprocessed_ytrain():
 ###############################################################################
 # INPUT TWEAKING
     
-def get_input_shape(Xtrain):
+def get_input_shape():
+    iter_csv = pd.read_csv(PATH_XTRAIN_PREPROCESSED, iterator=True, chunksize=1,sep = SEPARATOR) #usecols = X_COLUMNS
+    Xtrain = next(iter_csv)
     shape = Xtrain.shape
     out = shape[1]
     return out
@@ -50,10 +52,10 @@ def prepare_data():
     Xtrain = tweak_X(Xtrain)
     ytrain = load_preprocessed_ytrain()
     ytrain = tweak_y(ytrain)
-    input_shape = get_input_shape(Xtrain)
-    return Xtrain, ytrain, input_shape
+    return Xtrain, ytrain
 
 def initialize_neural_net(input_shape):
+
     K.clear_session()
     
     # MODEL DESIGN
@@ -72,18 +74,32 @@ def initialize_neural_net(input_shape):
     model.compile(optimizer='adam', loss=loss, metrics=['accuracy'])
     return model
 
-def initialize_training(modelname):
-    Xtrain, ytrain, input_shape = prepare_data()
+def initialize_model(modelname):
+    '''initialize model and train one initial epoch'''
+    input_shape = get_input_shape()
     model = initialize_neural_net(input_shape)
-    history = model.fit(Xtrain, ytrain, epochs = 1, validation_split=0.2, batch_size=100)
+    #history = model.fit(Xtrain, ytrain, epochs = 1, validation_split=0.2, batch_size=100)
     model.save(f"{PATH_MODELS}{modelname}.model")
-    evaluate_nn(history, model, modelname)
+    save_model_summary(model, modelname)
+    #evaluate_nn(history, model, modelname)
     print("MODEL INITIALIZED AND SAVED")
 
-def continue_training(modelname, epochs):
-    Xtrain, ytrain, input_shape = prepare_data()
+def perform_training(modelname, epochs):
+    '''load model and continue training for # of epochs'''
+    Xtrain, ytrain = prepare_data()
     model = load_model(f"{PATH_MODELS}{modelname}.model")
     history = model.fit(Xtrain, ytrain, epochs = epochs, validation_split=0.2, batch_size=100)
     model.save(f"{PATH_MODELS}{modelname}.model")
-    evaluate_nn(history, model, modelname)
+    save_learning_history(history, modelname)
+#    evaluate_nn(history, model, modelname)
     print("CONTINUED TRAINING AND SAVED MODEL")
+
+
+def gridsearch_kfold(modelname, epochs, folds):
+    '''for small datasets, use similar approach as with ML models, scikit-learn
+    wrapper for Keras, then gridsearch with kfold CV'''
+    Xtrain, ytrain, input_shape = prepare_data()
+    skf = StratifiedKFold(n_splits=folds)
+    skf.get_n_splits(Xtrain, ytrain)
+    for i, (train, test) in enumerate(skf):
+        input_shape = get_input_shape(Xtrain)

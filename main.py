@@ -5,7 +5,7 @@ from predict import ML_predict, NN_predict, combine_submission_chunks
 from preprocess_test import main as preprocess_testingdata
 from preprocess_train import main as preprocess_trainingdata
 from train_ML import main as train_model
-from train_NN import continue_training, initialize_training
+from train_NN import perform_training, initialize_model
 
 ###############################################################################
 # DATA PREPARATION
@@ -28,10 +28,10 @@ def train_ML_model(modelname):
 ###############################################################################
 # TRAIN NEURAL NETWORK 
 def initialize_nn(modelname):
-    initialize_training(modelname)
+    initialize_model(modelname)
     
-def continue_training_nn(modelname, epochs):
-    continue_training(modelname, epochs)
+def perform_training_nn(modelname, epochs):
+    perform_training(modelname, epochs)
 
 ###############################################################################
 # APPLY MODEL ON UNSEEN DATA (PREDICT ON TEST) 

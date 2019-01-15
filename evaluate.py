@@ -63,6 +63,3 @@ def save_model_summary(model, modelname):
     with open(f"{PATH_MODELS}{modelname}_readme.txt", "w") as text_file:
         model.summary(print_fn=lambda x: text_file.write(x + '\n'))
     
-def evaluate_nn(history, model, modelname):
-    save_learning_history(history, modelname)
-    save_model_summary(model, modelname)
