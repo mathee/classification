@@ -63,10 +63,10 @@ def initialize_neural_net():
     # MODEL DESIGN
     model = Sequential()
     model.add(Dense(60, activation = 'relu', input_shape=(input_shape,)))
-    model.add(Dense(120, activation = 'relu' ))
     model.add(Dropout(0.5))
-    model.add(Dense(60, activation = 'relu' ))
+    model.add(Dense(120, activation = 'relu' ))
     model.add(Dropout(0.2))
+    model.add(Dense(60, activation = 'relu' ))
     model.add(Dense(1, activation = 'sigmoid'))
     
 #    loss = "categorical_crossentropy"
@@ -95,7 +95,7 @@ def perform_training(modelname, epochs):
 #    evaluate_nn(history, model, modelname)
     print("CONTINUED TRAINING AND SAVED MODEL")
 
-def cv_kfold(epochs, folds):
+def cv_kfold(folds, epochs):
     '''for small datasets, create NN, then do k-fold crossvalidation on it'''
     Xtrain, ytrain = prepare_data()
   #  ytrain = ytrain.values.reshape(-1,)

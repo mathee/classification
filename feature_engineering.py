@@ -7,6 +7,7 @@ like scaling/encoding/deleting. --> Everything that requires domain knowledge.
 ###############################################################################
 # FUNCTIONS
 
+""" WIP
 def create_shifted_columns(df, column_name, min_shift, max_shift, shift_stepsize, prefix):
     '''For timeseries: Creates shifted columns for [column_name], in range of min-max-step,
     naming them "prefix(column_name-shiftvalue)"'''
@@ -20,7 +21,7 @@ def create_polynomials(df, column_name, min_power, max_power, stepsize, prefix):
     powers = list(range(min_power, max_power+1, stepsize))
     for i in powers:
         df[f"{prefix}({column_name})**{i}"] = df[column_name] ** i
-
+"""
 def create_category_combinations(X):
     object_columns = list(X.select_dtypes(include=['object']))
     for column1 in object_columns:
@@ -32,10 +33,10 @@ def create_category_combinations(X):
 # MAIN FUNCTION
 def engineer_train(X):
     X = create_category_combinations(X)
-    print(f"AFTER FEATURE ENGINEERING: {type(X)} - {X.shape}\n")
+    print(f"AFTER FEATURE ENGINEERING: {type(X)} - {X.shape}")
     return X
 
 def engineer_test(X):
     X = create_category_combinations(X)
-    print(f"AFTER FEATURE ENGINEERING: {type(X)} - {X.shape}\n")
+    print(f"AFTER FEATURE ENGINEERING: {type(X)} - {X.shape}")
     return X

@@ -294,15 +294,15 @@ def main(trainingset_size):
     '''preprocesses and save X,y for model training'''
     X = load_chunk(PATH_XTRAIN, chunksize=trainingset_size)
     X, y = drop_y_from_X(X) #--> decouple y from X at this point, only AFTER row deletions (!)
-#    X = feature_engineer_train(X)
+    X = feature_engineer_train(X)
     X = factorization_encoding(X)
     X = delete_sparse_columns(X, p=0.75)
     X = impute_numerical_NaNs(X, "mean") # “median”, “most_frequent”, "mean"
     X = scaling(X, (0,1))  
 #    X = select_high_variance_threshold(X, threshold=0.001)
     X = clip_outliers(X, 0.02, 0.98)
-#    X = select_tree_based(X, y, 10)
-    X = select_k_best_features(X, y, 50, f_classif) #26 works best for random forest, 60 for nn
+    X = select_tree_based(X, y, 10)
+#    X = select_k_best_features(X, y, 50, f_classif) #26 works best for random forest, 60 for nn
     X = scaling(X, (-1,1)) # scaling -1,1 for best NN performance
     save_preprocessed_Xtrain(X)
     save_preprocessed_ytrain(y)

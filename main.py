@@ -35,23 +35,23 @@ def perform_training_nn(modelname, epochs):
     datasets'''
     perform_training(modelname, epochs)
     
-def cv_nn(epochs, folds):
+def cv_nn(folds, epochs = 1):
     '''for smaller datasets, create NN, then do k-fold cross-validation on it'''
-    cv_kfold(epochs, folds)
+    cv_kfold(folds, epochs)
 
 ###############################################################################
 # APPLY MODEL ON UNSEEN DATA (PREDICT ON TEST) 
-def preprocess_testdata(chunksize): # set chunksize < dataset to predict on chunks
+def preprocess_testdata(chunksize=1000000): # set chunksize < dataset to predict on chunks
     # ! BE SURE PROCESS MATCHES PREPROCESSING OF TRAININGDATA
     preprocess_testingdata(chunksize)    
 
 def predict_chunks_ML(modelname, chunk_first, chunk_last):
     ML_predict(modelname, chunk_first, chunk_last)
     
-def predict_chunks_NN(modelname, chunk_first, chunk_last):
+def predict_chunks_NN(modelname, chunk_first=0, chunk_last=0):
     NN_predict(modelname, chunk_first, chunk_last)
     
 ##############################################################################
 # COMBINE SUBMISSION FILE CHUNKS
-def create_submission_file(modelname, chunk_first, chunk_last):
+def combine_submissions(modelname, chunk_first, chunk_last):
     combine_submission_chunks(modelname, chunk_first, chunk_last)

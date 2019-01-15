@@ -4,7 +4,6 @@
 SEPARATOR = "|" # separator for saving preprocessed files, to avoid confusion with "," values in file
 ###############################################################################
 # PATHES
-
 PATH_XTRAIN = "data/train.csv"
 PATH_YTRAIN = "data/train.csv"
 PATH_XTEST = "data/test.csv"
@@ -12,7 +11,6 @@ PATH_YTEST = "data/test.csv"
 ID_COLUMN_LABEL = "MachineIdentifier" # name/label of identifier column
 Y_COLUMN = ["HasDetections"] # column to be predicted, save here as list
 SUBMISSION_TYPE = "float" # datatype of predicted values, used in postprocess_ypred
-
 
 PATH_XTRAIN_PREPROCESSED = "data/preprocessed/Xtrain_preprocessed.csv"
 PATH_YTRAIN_PREPROCESSED = "data/preprocessed/ytrain_preprocessed.csv"

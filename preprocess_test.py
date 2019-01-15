@@ -111,7 +111,7 @@ def save_submission_frame(id_column, chunk):
 
 def preprocessing_Xtest(path=PATH_XTEST):
     X, id_column = load_chunk(path)
-#    X = feature_engineer_test(X)
+    X = feature_engineer_test(X)
     X = apply_column_structure_of_train(X)
     X = apply_factorization_encoding(X)
     X = apply_imputation(X)
@@ -129,8 +129,13 @@ def main(chunksize):
     iterator = load_iterator(chunksize)
     chunk = 0
     while True:
-        print(f"\nCHUNK_{chunk}__________\n")
-        X, id_column_for_submission  = preprocessing_Xtest(iterator)
-        save_preprocessed_Xtest(X, chunk)
-        save_submission_frame(id_column_for_submission, chunk)
-        chunk += 1
+        try:
+            print(f"\nCHUNK_{chunk}__________\n")
+            X, id_column_for_submission  = preprocessing_Xtest(iterator)
+            save_preprocessed_Xtest(X, chunk)
+            save_submission_frame(id_column_for_submission, chunk)
+            chunk += 1
+        except StopIteration:
+            print(f"FINISHED AFTER CHUNK {chunk-1}")
+            break
+            
