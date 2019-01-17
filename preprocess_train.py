@@ -185,6 +185,43 @@ def select_k_best_features(X, y, k, stat):
     print(f"SELECTED K-BEST FEATURES: {type(X)} - {X.shape}\n")
     return X
 
+def select_uncorrelated(X, corr_val):
+    '''
+    Obj: Drops features that are strongly correlated to other features.
+          This lowers model complexity, and aids in generalizing the model.
+    Inputs:
+          df: features df (x)
+          corr_val: Columns are dropped relative to the corr_val input (e.g. 0.8)
+    Output: df that only includes uncorrelated features
+    https://stackoverflow.com/questions/29294983/how-to-calculate-correlation-between-all-columns-and-remove-highly-correlated-on/43104383#43104383
+    '''
+
+    # Creates Correlation Matrix and Instantiates
+    corr_matrix = X.corr()
+    iters = range(len(corr_matrix.columns) - 1)
+    drop_cols = []
+
+    # Iterates through Correlation Matrix Table to find correlated columns
+    for i in iters:
+        for j in range(i):
+            item = corr_matrix.iloc[j:(j+1), (i+1):(i+2)]
+            col = item.columns
+            row = item.index
+            val = item.values
+            if val >= corr_val:
+                # Prints the correlated feature set and the corr val
+#                print(col.values[0], "|", row.values[0], "|", round(val[0][0], 2))
+                drop_cols.append(i)
+
+    drops = sorted(set(drop_cols))[::-1]
+    # Drops the correlated columns
+    for i in drops:
+        col = X.iloc[:, (i+1):(i+2)].columns.values
+        X = X.drop(col, axis=1)
+    print(f"DELETED CORRELATING FEATURES: {type(X)} - {X.shape}\n")
+    save_column_structure(X)
+    return X
+
 ############################################################################### 
 # ENCODING OF TEXT FEATURES
 
