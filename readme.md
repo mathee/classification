@@ -12,55 +12,40 @@ It is continuoulsy developed - so if I come across new and exiting
 things that fit in, I will definitely add them.
 ## Used Tech
 #### General
-Python 3.6
+Python 3.6<br/>
 #### Data Handling
-numpy
-pandas
-scipy
+numpy<br/>
+pandas<br/>
+scipy<br/>
 #### Models 
-Keras
-tensorflow
-scikit-learn
-xgboost
+Keras<br/>
+tensorflow<br/>
+scikit-learn<br/>
+xgboost<br/>
 #### Plotting
-matplotlib
-seaborn
-## Workflow and used files
-![alt text](dataflows.png)
-#### 1. Wrangling
-Obtain raw data from different sources like APIs, websites, databases, csv files etc and
-'wrangle' them into single files for model training and test (train.csv / test.csv).
-Output is saved in *data/wrangled*.
-(**wrangle.py** is the script for that - in this template only a placeholder)
+matplotlib<br/>
+seaborn<br/>
+## Main Process
+#### 1. Data Wrangling
 #### 2. Exploration
-Reading data from *data/wrangled*, then getting a feel for the data, doing some visualizations, #
-trying out different things: Essentially it is about getting to know the data and some ideas
-on how it can be used for machine learning.
-(**explore.ipynb** for actually doing stuff, **exploration.py**
-contains useful and reusable visualization functions etc.)
-#### 3. Preprocessing trainingdata / Feature Engineering
-Doing all preprocessing steps that are required to read training data into a machine learning
-model or neural net, e.g. encoding of categorical features, scaling, imputations etc. In addition
-to that, this is also the steo where all the feature engineering happens (**preprocess_train.py** contains
-many reusable preprocessing functions and the main preprocessing pipeline, 
-**feature_engineering.py** is the place to put more specialized functions 
-that are highly individual for every project, thus the file
-is more or less a placeholder here)
-
-
+#### 3. Preprocessing
+#### 4. Training
+#### 5. Predicting
+## Workflow structure
+![alt text](dataflows.png)
 ## Files
-#### config.py
-#### main.py
-#### wrangle.py
-#### exploration.py
-#### explore.ipynb
-#### preprocess_train.py
-#### feature_engineering.py
-#### train_ML.py
-#### train_NN.py
-#### evaluate.py
-#### preprocess_test.py
-#### predict.py
+main.py<br/>
+config.py<br/>
+wrangle.py<br/>
+exploration.py<br/>
+explore.ipynb<br/>
+preprocess_train.py<br/>
+feature_engineering.py<br/>
+train_ML.py<br/>
+train_NN.py<br/>
+evaluate.py<br/>
+preprocess_test.py<br/>
+predict.py<br/>
 ## Folder Structure
 -/data - *contains all data*<br/>
 -/data/raw - *contains raw data, raw files, in various formats, shapes etc.*<br/>
