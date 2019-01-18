@@ -8,12 +8,10 @@ can - after customization - be used for many of the "classical"
 classification and/or regression problems that might occur in a hands-on
 business context. No fancy rocket science, but solid machine learning
 with a practial approach.
-
 It is continuoulsy developed - so if I come across new and exiting 
 things that fit in, I will definitely add them.
-
 ## Used Tech
-#### Genral
+#### General
 Python 3.6
 Jupyter 
 #### Data Handling
@@ -28,8 +26,6 @@ xgboost
 #### Plotting
 matplotlib
 seaborn
-
-
 ## Files
 #### config.py
 #### main.py
@@ -42,13 +38,11 @@ seaborn
 #### train_NN.py
 #### preprocess_test.py
 #### predict.py
-
-
 ## Folder Structure
--/data - *contains all data*
--/data/raw - *contains raw data, raw files, in various formats, shapes etc.*
--/data/prepared - *train.csv, test.csv combining all features in single files*
--/data/preprocessed - *numerical, cleaned data for direct use in ML models*
--/models - *contains trained models*
--/models/support - *support models like fitted PCAs, scalers etc that will be applied on test data*
--/results - *all results*
+-/data - *contains all data*<br/>
+-/data/raw - *contains raw data, raw files, in various formats, shapes etc.*<br/>
+-/data/prepared - *train.csv, test.csv combining all features in single files*<br/>
+-/data/preprocessed - *numerical, cleaned data for direct use in ML models*<br/>
+-/models - *contains trained models*<br/>
+-/models/support - *support models like fitted PCAs, scalers etc that will be applied on test data*<br/>
+-/results - *all results*<br/>
