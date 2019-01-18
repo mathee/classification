@@ -40,7 +40,7 @@ def cv_nn(folds, epochs = 1):
     cv_kfold(folds, epochs)
 
 ###############################################################################
-# APPLY MODEL ON UNSEEN DATA (PREDICT ON TEST) 
+# APPLY MODEL ON UNSEEN DATA (PREDICT) 
 def preprocess_testdata(chunksize=1000000): # set chunksize < dataset to predict on chunks
     # ! BE SURE PROCESS MATCHES PREPROCESSING OF TRAININGDATA
     preprocess_testingdata(chunksize)    
