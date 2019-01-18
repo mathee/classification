@@ -31,7 +31,7 @@ seaborn<br/>
 #### 3. Preprocessing
 #### 4. Training
 #### 5. Predicting
-## Workflow structure
+## Workflow Structure
 ![alt text](dataflows.png)
 ## Files
 main.py<br/>
