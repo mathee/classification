@@ -26,6 +26,7 @@ xgboost
 matplotlib
 seaborn
 ## Workflow and used files
+![alt text](dataflows.png)
 #### 1. Wrangling
 Obtain raw data from different sources like APIs, websites, databases, csv files etc and
 'wrangle' them into single files for model training and test (train.csv / test.csv).
