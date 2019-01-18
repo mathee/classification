@@ -4,7 +4,7 @@ performance
 
 import pandas as pd
 from sklearn.metrics import confusion_matrix, precision_score, recall_score
-from config import PATH_MODELS
+from config import PATH_REPORTS
 
 ###############################################################################
 # EVALUATE GRIDSEARCH TRAINING PERFORMANCE
@@ -40,13 +40,13 @@ def save_gridsearch_report(X, y, grid, modelname):
         report = get_gridsearch_classification_report(X,y,grid,modelname)
     except:
         report = get_gridsearch_regression_report(grid,modelname) # does not exist yet
-    with open(f"{PATH_MODELS}{modelname}_readme.txt", "w") as text_file:
+    with open(f"{PATH_REPORTS}{modelname}_readme.txt", "w") as text_file:
         text_file.write(report)
     print(report)    
     
 def save_gridsearch_results(grid, modelname):
     cv_results = pd.DataFrame(grid.cv_results_)
-    cv_results.to_csv(f"{PATH_MODELS}{modelname}_gridsearch.csv", index = False, sep = ";")
+    cv_results.to_csv(f"{PATH_REPORTS}{modelname}_gridsearch.csv", index = False, sep = ";")
     
 def evaluate_gridsearch(X, y, grid, modelname):
     save_gridsearch_report(X, y, grid, modelname)
@@ -57,9 +57,9 @@ def evaluate_gridsearch(X, y, grid, modelname):
     
 def save_learning_history(history, modelname):
     out = pd.DataFrame(history.history)
-    out.to_csv(f"{PATH_MODELS}{modelname}_learning_history.csv", sep = ";")
+    out.to_csv(f"{PATH_REPORTS}{modelname}_learning_history.csv", sep = ";")
     
 def save_model_summary(model, modelname):    
-    with open(f"{PATH_MODELS}{modelname}_readme.txt", "w") as text_file:
+    with open(f"{PATH_REPORTS}{modelname}_readme.txt", "w") as text_file:
         model.summary(print_fn=lambda x: text_file.write(x + '\n'))
     
