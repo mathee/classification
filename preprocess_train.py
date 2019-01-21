@@ -1,6 +1,6 @@
 """PREPROCESS TRAININGDATA:
 IN: csv file that contains X as well as y
-OUT: separate files for X and y preprocessed for training
+OUT: separate files for X and y - preprocessed for training
 """
 
 import pickle
@@ -24,29 +24,35 @@ from feature_engineering import engineer_train as feature_engineer_train
 # GENERAL FUNCTIONS
 
 def load_chunk(path, chunksize):
-    '''loads chunk of the trainingset that will be used for training model'''
+    '''loads chunk of the trainingset that will be used for training model
+    IN: path: string of path to file | chunksize: int, no of rows to be read
+    Out: df: pd.DataFrame'''
     iter_csv = pd.read_csv(path, iterator=True, chunksize=chunksize) #usecols = X_COLUMNS
     df = next(iter_csv)
     print(f"AFTER LOADING: {type(df)} - {df.shape}\n")
     return df
 
 def drop_y_from_X(X):
-    '''deletes y-column in case it is still present in X data'''
+    '''deletes y-column from X
+    IN: X: pd.DataFrame
+    OUT: X: pd.DataFrame | y: pd.Series'''
     y = X[Y_COLUMN]
     X.drop(Y_COLUMN, axis=1, inplace=True)
     print(f"DROPPED Y: {type(X)} - {X.shape}\n")
     return X, y
 
 def save_column_structure(X):
-    '''saves dataframe with one row to disc, is used than later as a "blueprint"
-    for the test data, e.g. if one-hot-encoded features differ between train/test'''
+    '''saves minimal dataframe with only one row to disc, is used later as a "blueprint"
+    for getting the column structure right in test data
+    IN: pd.DataFrame'''
     trainingdata_structure = X.head(1)
     with open(f'{PATH_MODELS}support/trainingdata.structure', 'wb') as handle:
         pickle.dump(trainingdata_structure, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
 def reduce_y_by_X(y, index_of_X):
-    '''match rowcount in y with rowcount in X, using indices,in case some rows
-    have been deleted due to del NaN or so'''
+    '''match rows in y using indices of X
+    IN: y : pd.Series, index_of_X: pd.index
+    OUT: y : pd.Series'''
     y = y.loc[index_of_X]
     return y        
         
@@ -54,13 +60,17 @@ def reduce_y_by_X(y, index_of_X):
 # DEALING WITH NANs
     
 def drop_NaNs(X):
-    '''drops all rows from dataframe that conatin NULL values'''
+    '''drops all rows from dataframe that conatin NULL values
+    IN & OUT: X: pd.DataFrame'''
     X = X.dropna()
     print(f"DROPPED NaNs: {type(X)} - {X.shape}\n")
     return X
 
 def impute_numerical_NaNs(X, strategy="mean", missing_values=np.nan):
-    '''performs imputation on all numeric columns within dataframe'''
+    '''performs imputation on all numeric columns within dataframe.
+    strategy can be "mean", "median", "most_frequent" or "constant"
+    IN: X: pd.DataFrame | stategy: string | missing_values: float
+    OUT: X : pd.DataFrame'''
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     numeric_columns = list(X.select_dtypes(include=numerics))
     for col in numeric_columns:
@@ -76,7 +86,9 @@ def impute_numerical_NaNs(X, strategy="mean", missing_values=np.nan):
 # DEALING WITH OUTLIERS
     
 def clip_outliers(X, minPercentile = 0.01, maxPercentile = 0.99):
-    '''clips datapoints outside of the given percentiles in whole dataframe'''
+    '''clips datapoints outside of the given percentiles in whole dataframe
+    IN: X : pd.DataFrame | minPercentile : float | maxPercentile : float
+    OUT: X : pd.DataFrame'''
     cols = list(X)
     for col in cols:
         X[col] = X[col].clip((X[col].quantile(minPercentile)),(X[col].quantile(maxPercentile)))
@@ -84,8 +96,10 @@ def clip_outliers(X, minPercentile = 0.01, maxPercentile = 0.99):
     return X
 
 def delete_z_value_outliers(X, z_value = 3):
-    '''deletes rows from whole dataframe that contain outlying datapoint 
-    by the given magnitude of z stds'''
+    '''deletes rows from whole dataframe that contain outlying datapoints
+    by the given magnitude of z stds
+    IN: X : pd.DataFrame | z_value : float
+    OUT: X : pd.DataFrame'''
     X = X[(np.abs(stats.zscore(X)) < 3).all(axis=1)]
     index_of_X = X.index.values.tolist()
     print(f"DELETED Z_VALUE OUTLIERS: {type(X)} - {X.shape}\n")
@@ -95,6 +109,9 @@ def delete_z_value_outliers(X, z_value = 3):
 # COLUMN/FEATURE SELECTION
 
 def delete_sparse_columns(X, p=0.75):
+    '''deletes columns that have less that p % rows filled with actual data
+    IN: X : pd.DataFrame | p: float
+    OUT: X : pd.DataFrame'''
     all_columns = list(X)
     non_sufficient_columns = []
     for col in all_columns:
@@ -108,6 +125,9 @@ def delete_sparse_columns(X, p=0.75):
     return X
 
 def select_high_variance_threshold(X, threshold):
+    '''removes columns where the variance of the values is lower than treshold
+    IN: X : pd.DataFrame | treshold
+    OUT: X : pd.DataFrame'''
     #Select Model
     selector = VarianceThreshold(threshold) #Defaults to 0.0, e.g. only remove features with the same value in all samples
     #Fit the Model
@@ -124,7 +144,9 @@ def select_high_variance_threshold(X, threshold):
 
 def select_L1_based_classification(X, y, C):
     ''' lasso (l1) based penalty to select features, svc for classification
-    use e.g. linear_model.Lasso for regression problems'''
+    use e.g. linear_model.Lasso for regression problems
+    IN: X : pd.DataFrame | y : pd.Series | C : float
+    OUT: X : pd.DataFrame'''
     y = y.values.reshape(-1,)
     lsvc = LinearSVC(C=C, penalty="l1", dual=False).fit(X, y) # C, e.g. 0.007
     model = SelectFromModel(lsvc, prefit=True)
@@ -138,8 +160,9 @@ def select_L1_based_classification(X, y, C):
     return X
 
 def select_L1_based_regression(X, y, alpha):
-    ''' lasso (l1) based penalty to select features, svc for classification
-    use e.g. linear_model.Lasso for regression problems'''
+    ''' lasso (l1) based penalty to select features/columns
+    IN: X : pd.DataFrame | y : pd.Series | alpha : float
+    OUT: X : pd.DataFrame'''
     y = y.values.reshape(-1,)
     lrgr = Lasso(alpha=alpha) # alpha e.g. 0.2
     model = SelectFromModel(lrgr, prefit=True)
@@ -154,7 +177,9 @@ def select_L1_based_regression(X, y, alpha):
 
 def select_tree_based(X, y, n_estimators):
     '''is good for selecting categorical features, might take very long on
-    huge datasets'''
+    huge datasets
+    IN: X : pd.DataFrame | y : pd.Series | n_estimators : integer
+    OUT: X : pd.DataFrame'''
     y = y.values.reshape(-1,)    
     clf = ExtraTreesClassifier(n_estimators=n_estimators)
     clf = clf.fit(X, y)
@@ -170,7 +195,9 @@ def select_tree_based(X, y, n_estimators):
 
 def select_k_best_features(X, y, k, stat):
     '''works only for postivie values, so scaling needs to be done before
-    choose chi2 or f_classif as stat'''
+    choose chi2 or f_classif as stat
+    IN: X : pd.DataFrame  | y : pd.Series | k : int | stat : imported function from scipy
+    OUT: X : pd.DataFrame'''
     y = y.values.reshape(-1,)
     selector = SelectKBest(stat, k)
     selector.fit(X, y)
@@ -179,20 +206,15 @@ def select_k_best_features(X, y, k, stat):
     filtered_features = [features[i] for i in feature_indices]
     X = pd.DataFrame(selector.transform(X))
     X.columns = filtered_features
-    
     save_column_structure(X)
-    
     print(f"SELECTED K-BEST FEATURES: {type(X)} - {X.shape}\n")
     return X
 
 def select_uncorrelated(X, corr_val):
-    '''
-    Obj: Drops features that are strongly correlated to other features.
-          This lowers model complexity, and aids in generalizing the model.
-    Inputs:
-          df: features df (x)
-          corr_val: Columns are dropped relative to the corr_val input (e.g. 0.8)
-    Output: df that only includes uncorrelated features
+    ''' Drops features that are strongly correlated to other features.
+    This lowers model complexity, and aids in generalizing the model.
+    IN : df: features df (x) | corr_val: Columns are dropped relative to the corr_val input (e.g. 0.8)
+    OUT: df that only includes uncorrelated features
     https://stackoverflow.com/questions/29294983/how-to-calculate-correlation-between-all-columns-and-remove-highly-correlated-on/43104383#43104383
     '''
 
