@@ -11,27 +11,17 @@ with a practial approach.<br/>
 It is continuoulsy developed - so if I come across new and exiting 
 things that fit in, I will definitely add them.
 ## Used Tech
-#### General
 Python 3.6<br/>
-#### Data Handling
 numpy<br/>
 pandas<br/>
 scipy<br/>
-#### Models 
 Keras<br/>
 tensorflow<br/>
 scikit-learn<br/>
 xgboost<br/>
-#### Plotting
 matplotlib<br/>
 seaborn<br/>
-## Main Process
-#### 1. Data Wrangling
-#### 2. Exploration
-#### 3. Preprocessing
-#### 4. Training
-#### 5. Predicting
-## Workflow Structure
+## Process and File Structure
 ![alt text](dataflows.png)
 ## Files
 main.py<br/>
@@ -55,3 +45,8 @@ predict.py<br/>
 -/models/support - *support models like fitted PCAs, scalers etc that will be applied on test data*<br/>
 -/results - *all results*<br/>
 -/reports - *model information, trainings scores, neural net learning history etc.*<br/>
+## ToDo
++ automated interaction feature creation (interaction terms --> polynomials, A*B, A/B, etc.)<br/>
++ add outlier observations to exploration functions (dbscan etc)<br/>
++ improve balancing function to optionally balance out NaNs first<br/>
++ ROC Matrix for evaluation<br/>
