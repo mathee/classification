@@ -1,11 +1,11 @@
 # Machine Learning Essentials  
-"Machine Learning Essentials" is two things at the same time:
+ML Essentials is two things at the same time:
 1. A workflow structure for doing machine learning (in this case: building and
 evaluating a model)
 2. A collection of frequently used functions.
 The goal of this project is to provide a solid template that
 can - after customization - be used for many of the "classical"
-classification and/or regression problems that might occur in a hands-on
+classification and/or regression tasks that might occur in a hands-on
 business context. No fancy rocket science, but solid machine learning
 with a practial approach.<br/>
 It is continuoulsy developed - so if I come across new and exiting 
@@ -50,3 +50,4 @@ predict.py<br/>
 + add outlier observations to exploration functions (dbscan etc)<br/>
 + improve balancing function to optionally balance out NaNs first<br/>
 + ROC Matrix for evaluation<br/>
++ finish function descriptions

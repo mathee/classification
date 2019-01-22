@@ -9,8 +9,8 @@ PATH_YTRAIN = "data/wrangled/train.csv"
 PATH_XTEST = "data/wrangled/test.csv"
 PATH_YTEST = "data/wrangled/test.csv"
 ID_COLUMN_LABEL = "MachineIdentifier" # name/label of identifier column
-Y_COLUMN = ["HasDetections"] # column to be predicted, save here as list
-SUBMISSION_TYPE = "float" # datatype of predicted values, used in postprocess_ypred
+Y_COLUMN = ["HasDetections"] # column to be predicted, save here as [list]
+SUBMISSION_TYPE = "float" # datatype of predicted values, used in postprocess_ypred in predictions.py
 
 PATH_XTRAIN_PREPROCESSED = "data/preprocessed/Xtrain_preprocessed.csv"
 PATH_YTRAIN_PREPROCESSED = "data/preprocessed/ytrain_preprocessed.csv"
